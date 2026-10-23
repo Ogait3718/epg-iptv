@@ -107,6 +107,21 @@ COUNTRIES = {
 SKIP_GROUPS = r"24-7|VOD|XXX|Adult"
 SKIP_NAMES = r"24/7"
 
+# Grupos genéricos de desporto/eventos ("VIP Sports", "Events", "PPV VIP Sports"...).
+# Aqui o país só se sabe pelo nome; o canal só entra se tiver exatamente um
+# marcador de um dos nossos países (ex.: "S Sports Football FHD UK VIP SPORTS",
+# "UK | ...", "Eleven Sports 3 (Belgium FR)"). Sem marcador ou de outro país
+# (US, ES, IT, AT...) é descartado.
+SPORT_GROUPS = r"(?i)vip\s*sports?|\bevents?\b"
+SPORT_COUNTRY_WORDS = {
+    "PT": r"portugal", "BE": r"belgi(um|que|e)", "BR": r"bra[sz]il",
+    "FR": r"france", "DE": r"germany|deutschland", "UK": r"united kingdom|england|scotland",
+}
+SPORT_CODES = {"PT": "PT", "BE": "BE", "BR": "BR", "FR": "FR", "DE": "DE", "UK": "UK", "GB": "UK"}
+# Marcas que só existem num país, aceites mesmo sem código. "Sky Sports" (plural)
+# é só do Reino Unido; "TNT Sports" fica de fora porque também existe no Brasil.
+SPORT_BRANDS = {"UK": r"^Sky Sports\b"}
+
 TV_LOGOS_API = "https://api.github.com/repos/tv-logo/tv-logos/contents/countries/{}"
 TV_LOGOS_RAW = "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{}/"
 IPTV_ORG_CHANNELS = "https://iptv-org.github.io/api/channels.json"
@@ -322,6 +337,8 @@ def strip_source_noise(name):
     """Tira o sufixo de país (".pt", " UK") e o prefixo de cidade ("São Paulo/SP  ")."""
     name = re.sub(r"^[^/]{2,40}/[A-Z]{2}\s+", "", html.unescape(name).strip())
     name = re.sub(r"\s*\|\s*Event\s*$", "", name, flags=re.I)  # "Canal+ Live 1 FR | Event"
+    name = re.sub(r"\s+VIP\s+SPORTS?\s*$", "", name, flags=re.I)  # grupos "VIP Sports"
+    name = re.sub(r"^(PT|BE|BR|FR|DE|UK|GB)\s*[|:]\s*", "", name)  # "UK | Sky Sports"
     return re.sub(COUNTRY_TAIL, "", name, flags=re.I).strip()
 
 
@@ -331,8 +348,9 @@ def norm(name, cc="PT", aliases=True):
     Os ALIASES só se aplicam aos nomes da lista/logótipos; os nomes das fontes
     EPG ficam como estão, para "CNN" não ser confundido com "CNN Portugal".
     """
-    s = ascii_fold(strip_source_noise(name)).lower()
-    s = re.sub(r"\(.*?\)|\[.*?\]", " ", s)
+    # parênteses antes do sufixo de país: "AMAZON PRIME 8 HD FR (ONLY EVENTS)"
+    s = re.sub(r"\(.*?\)|\[.*?\]", " ", name)
+    s = ascii_fold(strip_source_noise(s)).lower()
     s = s.replace("4:3", " ").replace("+", " mais ").replace("&", " ")
     toks = [t for t in re.findall(r"[a-z0-9]+", s) if t not in STRIP_TOKENS]
     if cc in SKY_PREFIX and toks[:1] == ["s"]:
@@ -389,10 +407,29 @@ def read_m3u(path):
     return raw.split("\n")
 
 
+def sport_country(name):
+    """País de um canal dos grupos de desporto/eventos, ou None se não for claro."""
+    # o país por extenso entre parênteses ganha ao código de língua: "(Belgium FR)"
+    for paren in re.findall(r"\(([^)]*)\)", name):
+        found = {cc for cc, rx in SPORT_COUNTRY_WORDS.items() if re.search(rx, paren, re.I)}
+        if len(found) == 1:
+            return found.pop()
+    codes = {SPORT_CODES[t] for t in re.findall(r"\b([A-Z]{2})\b", name) if t in SPORT_CODES}
+    if len(codes) == 1:
+        return codes.pop()
+    if not codes and not re.search(r"\b[A-Z]{2}\b", name.replace("VIP", "")):
+        found = [cc for cc, rx in SPORT_BRANDS.items() if re.search(rx, name)]
+        if len(found) == 1:
+            return found[0]
+    return None
+
+
 def country_of(group, name):
     for cc, cfg in COUNTRIES.items():
         if re.search(cfg["groups"], group):
             return cc
+    if re.search(SPORT_GROUPS, group):
+        return sport_country(name)
     if re.search(SKIP_GROUPS, group):
         return None
     for cc, cfg in COUNTRIES.items():
