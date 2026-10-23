@@ -1,0 +1,66 @@
+name: Atualizar EPG
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # todos os dias às 03:00 UTC
+  workflow_dispatch:       # permite correr à mão no separador Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Descarregar lista M3U (secret M3U_URL)
+        env:
+          M3U_URL: ${{ secrets.M3U_URL }}
+        run: |
+          if [ -z "$M3U_URL" ]; then
+            echo "::error::Falta o secret M3U_URL (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          # sem -v nem echo do URL, para as credenciais não aparecerem nos logs
+          curl -fsSL --retry 3 --max-time 300 -A "TiviMate/5.0" -o lista.m3u "$M3U_URL" \
+            || { echo "::error::Não foi possível descarregar a lista M3U."; exit 1; }
+          grep -q '^#EXTM3U' lista.m3u || { echo "::error::A resposta não é uma lista M3U."; exit 1; }
+
+      - name: Gerar epg.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python generate_epg.py --report ""
+
+      - name: Preparar site (só o epg.xml)
+        run: |
+          mkdir -p _site
+          cp epg.xml _site/epg.xml
+          gzip -9 -c epg.xml > _site/epg.xml.gz
+          touch _site/.nojekyll
+          rm -f lista.m3u
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}epg.xml
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

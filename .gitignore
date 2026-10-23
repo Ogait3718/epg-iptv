@@ -1,0 +1,12 @@
+# Lista com credenciais do fornecedor – nunca enviar para o GitHub
+lista.m3u
+*.m3u
+*.m3u8
+
+# Ficheiros gerados (o epg.xml é publicado pelo workflow no GitHub Pages)
+epg.xml
+epg.xml.gz
+canais.csv
+_site/
+
+__pycache__/
