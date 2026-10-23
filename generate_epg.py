@@ -378,6 +378,7 @@ def norm(name, cc="PT", aliases=True):
     # parênteses antes do sufixo de país: "AMAZON PRIME 8 HD FR (ONLY EVENTS)"
     s = re.sub(r"\(.*?\)|\[.*?\]", " ", name)
     s = ascii_fold(strip_source_noise(s)).lower()
+    s = re.sub(r"\bsd\+", " ", s)  # "beIN SPORTS 1 SD+" é qualidade, não "+1"
     s = s.replace("4:3", " ").replace("+", " mais ").replace("&", " ")
     toks = [t for t in re.findall(r"[a-z0-9]+", s) if t not in STRIP_TOKENS]
     if cc in SKY_PREFIX and toks[:1] == ["s"]:
@@ -668,6 +669,33 @@ def print_missing(rows):
             log(f"  · {name}{f' (+{n - 1})' if n > 1 else ''}  [tem EPG, sem logótipo]")
 
 
+def print_check(pattern, rows, programmes, logo_of, now):
+    """Relatório de um conjunto de canais: fonte escolhida, grelha e logótipo."""
+    progs_of = {cid: progs for cid, progs in programmes}
+    groups = {}
+    for cc, group, name, tvg_id, src, _ in rows:
+        if re.search(pattern, name, re.I):
+            key = (cc, norm(name, cc))
+            groups.setdefault(key, {"tvg_id": tvg_id, "src": src, "names": []})["names"].append(f"{name}  [{group}]")
+    log(f"\nVerificação dos canais '{pattern}': {len(groups)} canais, "
+        f"{sum(len(g['names']) for g in groups.values())} entradas na lista")
+    for (cc, key), g in sorted(groups.items()):
+        progs = progs_of.get(g["tvg_id"], [])
+        future = [p for p in progs if parse_time(p.get("stop")) > now]
+        if future:
+            last = max(parse_time(p.get("stop")) for p in future)
+            epg = f"{g['src']}: {len(future)} programas até {last:%d/%m %H:%M} UTC"
+        else:
+            epg = "SEM EPG"
+        logo = logo_of.get((cc, key), "SEM LOGÓTIPO")
+        ok = "OK " if future and (cc, key) in logo_of else "!! "
+        log(f"\n{ok}[{cc}] {g['tvg_id'] or '(sem tvg-id)'}")
+        log(f"    EPG:  {epg}")
+        log(f"    Logo: {logo}")
+        for n in g["names"]:
+            log(f"    - {n}")
+
+
 # --------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------
@@ -679,6 +707,9 @@ def main():
     ap.add_argument("--report", default="canais.csv")
     ap.add_argument("--countries", default=",".join(COUNTRIES),
                     help="países a tratar, separados por vírgula (ex.: PT,UK)")
+    ap.add_argument("--check", default="",
+                    help="mostra o estado (fonte, programas, logótipo) dos canais cujo nome "
+                         "corresponda a esta regex, ex.: --check 'beIN SPORTS.*FR'")
     ap.add_argument("--epg-url", default=os.environ.get("EPG_URL", ""),
                     help="URL pública do epg.xml, colocada em url-tvg no cabeçalho da lista")
     args = ap.parse_args()
@@ -783,6 +814,8 @@ def main():
     for cc, (total, with_epg, with_logo) in stats.items():
         log(f"{args.m3u} {cc}: {with_epg}/{total} com EPG, {with_logo}/{total} com logótipo HD")
     print_missing(rows)
+    if args.check:
+        print_check(args.check, rows, programmes, logo_of, now)
 
     if args.report:
         with open(args.report, "w", encoding="utf-8", newline="") as f:
