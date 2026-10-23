@@ -7,6 +7,8 @@
 - Procura logótipos HD transparentes (tv-logo/tv-logos e iptv-org) e
   coloca-os no epg.xml e nas tags tvg-logo da lista.
 - Reescreve tvg-id / tvg-logo na lista para corresponderem ao epg.xml.
+- Acrescenta ao epg.xml os nomes exatos do fornecedor como <display-name>,
+  para o TiviMate (Xtream Codes) associar a programação pelo nome.
 
 Só usa a biblioteca padrão do Python (3.9+).
 """
@@ -349,6 +351,16 @@ def main():
     log(f"{len(channels)} canais a tratar em {args.m3u}")
     keys = {norm(name) for _, name, _ in channels}
 
+    # Nomes exatos do fornecedor (título, tvg-name e tvg-id originais) por canal.
+    # Com Xtream Codes o TiviMate mostra estes nomes e associa o EPG por eles.
+    provider_names = {}
+    for i, name, _ in channels:
+        names = provider_names.setdefault(norm(name), [])
+        for n in (name, get_attr(lines[i], "tvg-name"), get_attr(lines[i], "tvg-id")):
+            n = n.strip()
+            if n and n not in names:
+                names.append(n)
+
     epg = load_epg_sources(keys, start, end)
     if not epg:
         sys.exit("Nenhuma fonte EPG respondeu – epg.xml não foi alterado.")
@@ -366,7 +378,10 @@ def main():
         cid = make_id(label)
         chosen[key] = (cid, src, progs)
         ch = ET.SubElement(tv, "channel", id=cid)
-        ET.SubElement(ch, "display-name", lang="pt").text = pretty(label)
+        display = [pretty(label)]
+        display += [n for n in provider_names.get(key, []) if n != display[0]]
+        for n in display:
+            ET.SubElement(ch, "display-name", lang="pt").text = n
         if key in logos:
             ET.SubElement(ch, "icon", src=logos[key])
     for key in sorted(epg):
