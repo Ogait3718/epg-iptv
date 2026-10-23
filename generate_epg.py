@@ -25,6 +25,7 @@ import os
 import re
 import sys
 import unicodedata
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
@@ -118,14 +119,40 @@ SPORT_COUNTRY_WORDS = {
     "FR": r"france", "DE": r"germany|deutschland", "UK": r"united kingdom|england|scotland",
 }
 SPORT_CODES = {"PT": "PT", "BE": "BE", "BR": "BR", "FR": "FR", "DE": "DE", "UK": "UK", "GB": "UK"}
-# Marcas que só existem num país, aceites mesmo sem código. "Sky Sports" (plural)
-# é só do Reino Unido; "TNT Sports" fica de fora porque também existe no Brasil.
-SPORT_BRANDS = {"UK": r"^Sky Sports\b"}
+# Marcas aceites mesmo sem código. "Sky Sports" (plural) é só do Reino Unido;
+# "TNT Sports" também existe no Brasil, mas nestes grupos sem código é o do UK.
+SPORT_BRANDS = {"UK": r"^(Sky|TNT) Sports\b"}
 
 TV_LOGOS_API = "https://api.github.com/repos/tv-logo/tv-logos/contents/countries/{}"
 TV_LOGOS_RAW = "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{}/"
 IPTV_ORG_CHANNELS = "https://iptv-org.github.io/api/channels.json"
 IPTV_ORG_LOGOS = "https://iptv-org.github.io/api/logos.json"
+
+# Prioridade dos logótipos (o primeiro que existir ganha):
+#   1. OFFICIAL_LOGOS – ficheiros oficiais das próprias emissoras
+#   2. iptv-org com URL num domínio oficial de emissora (apanha rebrandings
+#      novos sem mexer no script, ex.: RTP 2026)
+#   3. tv-logo/tv-logos (PNG transparente 512 px)
+#   4. restantes logótipos PNG do iptv-org (o maior)
+OFFICIAL_LOGO_HOSTS = (
+    r"(^|\.)(rtp\.pt|iol\.pt|sic\.pt|impresa\.pt|bbci?\.co\.uk|itv\.com|channel[45]\.com|sky\.com"
+    r"|rtbf\.be|vrt\.be|dpgmedia\.(be|net)|globo\.com|glbimg\.com|sbt\.com\.br|r7\.com"
+    r"|tf1\.fr|francetv\.fr|france\.tv|cnews\.fr|canalplus\.com|m6\.fr|arte\.tv"
+    r"|ard\.de|daserste\.de|zdf\.de|rtl\.de|prosiebensat1\.(de|com)|br\.de|wdr\.de|ndr\.de|mdr\.de|swr\.de)$"
+)
+RTP_CDN = "https://cdn-images.rtp.pt/common/img/channels/logos/color/horizontal/{}_2026.png"
+IOL_CDN = "https://cdn.iol.pt/img/logostvi/branco/{}.png"  # versão branca, para fundo escuro
+OFFICIAL_LOGOS = {
+    "PT": {
+        "RTP 1": RTP_CDN.format("rtp1"), "RTP 2": RTP_CDN.format("rtp2"),
+        "RTP Notícias": RTP_CDN.format("rtpnoticias"), "RTP 3": RTP_CDN.format("rtpnoticias"),
+        "RTP Memória": RTP_CDN.format("rtpmemoria"), "RTP África": RTP_CDN.format("rtpafrica"),
+        "RTP Açores": RTP_CDN.format("rtpacores"), "RTP Madeira": RTP_CDN.format("rtpmadeira"),
+        "TVI Reality": IOL_CDN.format("tvireality"), "TVI Ficção": IOL_CDN.format("tvificcao"),
+        "TVI Internacional": IOL_CDN.format("tviinternacional"), "TVI África": IOL_CDN.format("tviafrica"),
+        "V+TVI": IOL_CDN.format("vmaistvi"),
+    },
+}
 
 # Códigos usados pela fonte MEO -> nome do canal
 MEO_CODES = {
@@ -562,11 +589,15 @@ def load_tv_logos(cc):
 def load_logos():
     """Devolve {país: {key: url}}. Prioridade: tv-logo/tv-logos > iptv-org (PNG, maior)."""
     chans, lgs = fetch(IPTV_ORG_CHANNELS), fetch(IPTV_ORG_LOGOS)
-    best = {}
+    best, official = {}, {}
     if chans and lgs:
         for l in json.loads(lgs):
             if l.get("format") != "PNG" or l.get("feed"):
                 continue
+            # no domínio oficial a largura do iptv-org nem sempre está certa
+            # (rtpnoticias_2026.png diz 185 px e tem 2340), por isso não conta
+            if re.search(OFFICIAL_LOGO_HOSTS, urllib.parse.urlparse(l["url"]).hostname or ""):
+                official.setdefault(l["channel"], l)
             cur = best.get(l["channel"])
             if not cur or (l.get("width") or 0) > (cur.get("width") or 0):
                 best[l["channel"]] = l
@@ -576,7 +607,7 @@ def load_logos():
 
     logos, local = {}, {}
     for cc, cfg in COUNTRIES.items():
-        iptv, own = {}, {}
+        iptv, own, own_official = {}, {}, {}
         # canais do próprio país primeiro, para ganharem a outros com o mesmo nome
         for c in sorted(chans, key=lambda c: c.get("country") != cfg["iptv"]):
             for n in [c["name"], *c.get("alt_names", [])]:
@@ -584,9 +615,16 @@ def load_logos():
                     iptv.setdefault(key, best[c["id"]]["url"])
                     if c.get("country") == cfg["iptv"]:
                         own.setdefault(key, best[c["id"]]["url"])
+                        if c["id"] in official:
+                            own_official.setdefault(key, official[c["id"]]["url"])
+        curated = {}
+        for n, url in OFFICIAL_LOGOS.get(cc, {}).items():
+            for key in {norm(n, cc), norm(n, cc, aliases=False)}:
+                curated[key] = url
         tvlogos = load_tv_logos(cc)
-        logos[cc] = {**iptv, **tvlogos}
-        local[cc] = {**own, **tvlogos}
+        logos[cc] = {**iptv, **tvlogos, **own_official, **curated}
+        local[cc] = {**own, **tvlogos, **own_official, **curated}
+        log(f"  {cc}: {len(curated)} logótipos oficiais, {len(own_official)} do iptv-org em domínio oficial")
     log(f"- iptv-org: {len(best)} canais com logótipo PNG")
     return logos, local
 
