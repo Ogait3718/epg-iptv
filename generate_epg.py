@@ -14,6 +14,7 @@
 Só usa a biblioteca padrão do Python (3.9+).
 """
 import argparse
+import copy
 import csv
 import datetime as dt
 import gzip
@@ -180,6 +181,7 @@ NAME_ALIASES = {
         "DAZN Pro Leagues 1": "DAZN Pro League 1", "Discovery Science": "Disc Science",
         "Eurosport 2": "Eurosp2 HD N", "QU4TRE": "Quatre HD", "RTBF Tipik": "RTBF Tipik TV HD",
         "RTL Luxembourg": "RTL Lëtzebuerg", "TVL": "TV Lux HD", "VTM 1": "VTM HD",
+        "Nat Geo": "National Geographic HD", "E! Entertainment": "E! HD N",
     },
     "BR": {
         "Band Sport": "BandSports HD", "CNN Internacional": "CNN INTERNATIONAL",
@@ -194,6 +196,10 @@ NAME_ALIASES = {
         "SBT TV Jornal": "TV Jornal HD", "SporTV 1": "SporTV HD",
         "TC Action": "Telecine Action HD", "TC Cult": "Telecine Cult HD",
         "TC Fun": "Telecine Fun HD", "TC Pipoca": "Telecine Pipoca HD",
+        "Globo MINAS": "Globo Belo Horizonte HD", "MTV": "MTV Brasil",
+        "NatGeo": "National Geographic", "ID Discovery": "ID HD",
+        "Discovery H&H": "Discovery Home & Health HD", "DISCOVERY TLC": "TLC HD",
+        "Warner TV": "Warner Channel HD",
     },
     "FR": {
         "C-STAR HITS": "CSTAR Hits France", "Cine Club": "Ciné+ Club",
@@ -210,6 +216,8 @@ NAME_ALIASES = {
         "RMC SPORTS 2": "RMC Sport 2", "SCIENCES&VIE": "Science & Vie TV",
         "Tele Melody": "Melody", "Tele Novelas": "Novelas TV", "Trace CARRIBEAN": "Trace Caribbean",
         "TV5 Monde Europe": "TV5MONDE", "TV8 Mont+Blanc": "8 Mont-Blanc", "USHUAIA": "Ushuaïa TV",
+        "Numéro 23": "RMC Story", "Golf Channel": "Golf+", "Ciné Polar": "Polar+",
+        "DAZN 1": "DAZN",
     },
     "DE": {
         "Auto Motor Sport TV": "auto motor und sport", "CRIME INVESTIGATION": "Crime+Investigation",
@@ -227,6 +235,9 @@ NAME_ALIASES = {
         "WDR Aachen": "WDR Fernsehen Aachen", "WDR Duisburg": "WDR Fernsehen Duisburg",
         "WDR Wuppertal": "WDR Fernsehen Wuppertal", "Wedo Movies": "wedotv Movies",
         "Mainfranken Würzburg TV": "TV Mainfranken", "SWR": "SWR/SR",
+        "AXN": "AXN Black", "History": "The HISTORY Channel", "Nickelodeon": "nick",
+        "Sky 1": "Sky One", "GEO": "GEO Television", "Silverline Movie Channel": "Silverline",
+        "ORF eins": "ORF 1", "SR": "SR Fernsehen",
         **{f"BUNDESLIGA {n}": f"Sky Sport Bundesliga {n}" for n in range(1, 11)},
     },
     "UK": {
@@ -262,6 +273,8 @@ NAME_ALIASES = {
         "TravelXP Europe": "Travelxp", "Virgin One": "Virgin Media One HD",
         "Virgin Two": "Virgin Media Two HD", "Virgin Three": "Virgin Media Three",
         "Virgin Media 4": "Virgin Media Four HD",
+        "National Geographic": "Nat Geo HD", "Investigation Discovery": "ID",
+        "NICK": "Nickelodeon HD", "MTV 1": "MTV HD", "Racing UK HD": "Racing TV HD",
     },
 }
 ALIASES = {"PT": ALIASES_PT}
@@ -456,13 +469,27 @@ def load_epg_sources(cc, wanted_keys, start, end):
     return found
 
 
+def shift_programme(p, hours):
+    """Cópia do programa com início/fim deslocados (para canais "+1")."""
+    q = copy.deepcopy(p)
+    for attr in ("start", "stop"):
+        t = parse_time(q.get(attr)) + dt.timedelta(hours=hours)
+        q.set(attr, t.strftime("%Y%m%d%H%M%S %z"))
+    return q
+
+
 def best_source(cands, now):
-    """Escolhe a fonte com mais programação futura (e, em empate, a primeira)."""
+    """Escolhe a fonte com mais programas futuros; em empate, a que vai mais longe.
+
+    Conta programas e não só a hora final: algumas fontes têm um único bloco
+    "fictício" de vários dias (ex.: beIN SPORTS 1 na france3), que ganharia a
+    uma fonte com a grelha completa.
+    """
     def score(c):
         progs = c[2]
         last = max(parse_time(p.get("stop")) for p in progs)
         future = sum(1 for p in progs if parse_time(p.get("stop")) > now)
-        return (last, future)
+        return (future, last)
     return max(cands, key=score)
 
 
@@ -484,11 +511,13 @@ def load_tv_logos(cc):
             if not fname.endswith(".png") or "-icon" in fname:
                 continue
             stem = re.sub(rf"-({suffix})$", "", fname[:-4])
-            key = norm(stem.replace("-", " "), cc)
             is_hd = bool(re.search(r"(^|-)hd(-|$)", stem))
-            # a versão sem "HD" no logótipo é a mais limpa; usa a HD só se for a única
-            if key not in tvlogos or (tvlogos[key][1] and not is_hd):
-                tvlogos[key] = (TV_LOGOS_RAW.format(folder) + fname, is_hd)
+            # com e sem aliases: "BBC One" tem alias para a região de Londres,
+            # mas o logótipo "bbcone" também serve de marca para as outras regiões
+            for key in {norm(stem.replace("-", " "), cc), norm(stem.replace("-", " "), cc, aliases=False)}:
+                # a versão sem "HD" no logótipo é a mais limpa; usa a HD só se for a única
+                if key not in tvlogos or (tvlogos[key][1] and not is_hd):
+                    tvlogos[key] = (TV_LOGOS_RAW.format(folder) + fname, is_hd)
     log(f"- tv-logo/tv-logos {cc}: {len(tvlogos)} logótipos")
     return {k: v[0] for k, v in tvlogos.items()}
 
@@ -508,16 +537,60 @@ def load_logos():
     else:
         chans = []
 
-    logos = {}
+    logos, local = {}, {}
     for cc, cfg in COUNTRIES.items():
-        iptv = {}
+        iptv, own = {}, {}
         # canais do próprio país primeiro, para ganharem a outros com o mesmo nome
         for c in sorted(chans, key=lambda c: c.get("country") != cfg["iptv"]):
             for n in [c["name"], *c.get("alt_names", [])]:
-                iptv.setdefault(norm(n, cc), best[c["id"]]["url"])
-        logos[cc] = {**iptv, **load_tv_logos(cc)}
+                for key in {norm(n, cc), norm(n, cc, aliases=False)}:
+                    iptv.setdefault(key, best[c["id"]]["url"])
+                    if c.get("country") == cfg["iptv"]:
+                        own.setdefault(key, best[c["id"]]["url"])
+        tvlogos = load_tv_logos(cc)
+        logos[cc] = {**iptv, **tvlogos}
+        local[cc] = {**own, **tvlogos}
     log(f"- iptv-org: {len(best)} canais com logótipo PNG")
-    return logos
+    return logos, local
+
+
+def find_logo(key, table, local):
+    """Logótipo exato; senão o do canal base ("+1") ou da marca do mesmo país.
+
+    Ex.: "BBC One South" -> BBC One, "Globo SP" -> Globo, "E4 +1" -> E4.
+    A marca só é procurada nos logótipos do próprio país e nunca corta a meio
+    de um número ("DAZN 10" não fica com o logótipo do "DAZN 1").
+    """
+    if key in table:
+        return table[key]
+    base = re.sub(r"mais(1|24)$", "", key)
+    if base != key and base in table:
+        return table[base]
+    # canais de notícias são outra marca ("Fox News" não é a "Fox")
+    prefixes = [k for k in local if len(k) >= 3 and base.startswith(k)
+                and not base[len(k):][:1].isdigit() and not base[len(k):].startswith("news")]
+    return local[max(prefixes, key=len)] if prefixes else None
+
+
+def print_missing(rows):
+    """Resumo por país dos canais sem EPG e/ou sem logótipo (variantes agrupadas)."""
+    groups = {}
+    for cc, _, name, _, src, logo in rows:
+        g = groups.setdefault((cc, norm(name, cc)), {"names": [], "epg": src != "-", "logo": logo == "sim"})
+        g["names"].append(name)
+    log("\nCanais sem EPG e/ou sem logótipo HD (variantes FHD/HD/HEVC agrupadas):")
+    for cc in COUNTRIES:
+        items = [(min(g["names"], key=len), len(g["names"]), g["epg"], g["logo"])
+                 for (c, _), g in groups.items() if c == cc and not (g["epg"] and g["logo"])]
+        if not items:
+            continue
+        no_epg = sorted(i for i in items if not i[2])
+        no_logo = sorted(i for i in items if i[2] and not i[3])
+        log(f"\n[{cc}] {len(no_epg)} sem EPG, {len(no_logo)} só sem logótipo")
+        for name, n, _, logo in no_epg:
+            log(f"  - {name}{f' (+{n - 1})' if n > 1 else ''}{'' if logo else '  [sem logótipo]'}")
+        for name, n, _, _ in no_logo:
+            log(f"  · {name}{f' (+{n - 1})' if n > 1 else ''}  [tem EPG, sem logótipo]")
 
 
 # --------------------------------------------------------------------------
@@ -553,7 +626,12 @@ def main():
             if n and n not in names:
                 names.append(n)
 
-    logos = load_logos()
+    logos, local_logos = load_logos()
+    logo_of = {}
+    for cc, key in provider_names:
+        url = find_logo(key, logos[cc], local_logos[cc])
+        if url:
+            logo_of[(cc, key)] = url
     tv = ET.Element("tv", {"generator-info-name": "generate_epg.py",
                            "source-info-name": "open-epg.com, epgshare01.online"})
     # o ID vem do nome MEO quando existe, para não mudar de dia para dia
@@ -561,8 +639,21 @@ def main():
     chosen, programmes = {}, []
     for cc in wanted:
         keys = {k for c, k in provider_names if c == cc}
-        epg = load_epg_sources(cc, keys, start, end)
-        for key in sorted(epg):
+        # canais "+1"/"+24" sem guia próprio: usa o canal base com a hora deslocada
+        shifted = {}
+        for key in keys:
+            m = re.fullmatch(r"(.+?)mais(1|24)", key)
+            if m:
+                base = ALIASES.get(cc, {}).get(m.group(1), m.group(1))
+                shifted[key] = (base, int(m.group(2)))
+        epg = load_epg_sources(cc, keys | {b for b, _ in shifted.values()}, start, end)
+        for key, (base, hours) in shifted.items():
+            if key in epg or base not in epg:
+                continue
+            src, label, progs = best_source(epg[base], now)
+            epg[key] = [(f"{src} +{hours}h", f"{pretty(label)} +{hours}",
+                         [shift_programme(p, hours) for p in progs])]
+        for key in sorted(k for k in epg if k in keys):
             src, _, progs = best_source(epg[key], now)
             label = meo_names.get(key) if cc == "PT" else None
             label = label or epg[key][0][1]
@@ -573,8 +664,8 @@ def main():
             display += [n for n in provider_names.get((cc, key), []) if n != display[0]]
             for n in display:
                 ET.SubElement(ch, "display-name", lang=COUNTRIES[cc]["lang"]).text = n
-            if key in logos[cc]:
-                ET.SubElement(ch, "icon", src=logos[cc][key])
+            if (cc, key) in logo_of:
+                ET.SubElement(ch, "icon", src=logo_of[(cc, key)])
             programmes.append((cid, progs))
     if not chosen:
         sys.exit("Nenhuma fonte EPG respondeu – epg.xml não foi alterado.")
@@ -599,7 +690,7 @@ def main():
         key = norm(name, cc)
         line = lines[i]
         tvg_id, src = chosen.get((cc, key), ("", ""))
-        logo = logos[cc].get(key)
+        logo = logo_of.get((cc, key))
         if tvg_id:
             line = set_attr(line, "tvg-id", tvg_id)
         if logo:
@@ -616,6 +707,7 @@ def main():
         f.write("\n".join(lines))
     for cc, (total, with_epg, with_logo) in stats.items():
         log(f"{args.m3u} {cc}: {with_epg}/{total} com EPG, {with_logo}/{total} com logótipo HD")
+    print_missing(rows)
 
     if args.report:
         with open(args.report, "w", encoding="utf-8", newline="") as f:
