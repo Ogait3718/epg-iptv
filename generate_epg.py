@@ -142,6 +142,8 @@ OFFICIAL_LOGO_HOSTS = (
 )
 RTP_CDN = "https://cdn-images.rtp.pt/common/img/channels/logos/color/horizontal/{}_2026.png"
 IOL_CDN = "https://cdn.iol.pt/img/logostvi/branco/{}.png"  # versão branca, para fundo escuro
+# logótipos feitos por nós (pasta logos/), quando o tv-logo/tv-logos não tem o canal
+REPO_LOGOS = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/{}.png"
 OFFICIAL_LOGOS = {
     "PT": {
         "RTP 1": RTP_CDN.format("rtp1"), "RTP 2": RTP_CDN.format("rtp2"),
@@ -151,6 +153,8 @@ OFFICIAL_LOGOS = {
         "TVI Reality": IOL_CDN.format("tvireality"), "TVI Ficção": IOL_CDN.format("tvificcao"),
         "TVI Internacional": IOL_CDN.format("tviinternacional"), "TVI África": IOL_CDN.format("tviafrica"),
         "V+TVI": IOL_CDN.format("vmaistvi"),
+        # mesmo desenho dos SPORT TV 1-6 do tv-logo/tv-logos (512x96, letras brancas)
+        "SPORT TV7": REPO_LOGOS.format("sport-tv-7-pt"),
     },
 }
 
