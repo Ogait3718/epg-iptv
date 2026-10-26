@@ -365,6 +365,8 @@ NAME_ALIASES = {
         "TV5 Monde Europe": "TV5MONDE", "TV8 Mont+Blanc": "8 Mont-Blanc", "USHUAIA": "Ushuaïa TV",
         "Numéro 23": "RMC Story", "Golf Channel": "Golf+", "Ciné Polar": "Polar+",
         "DAZN 1": "DAZN",
+        # canais da plataforma da LFP; no tv-logos são "Ligue 1+" e "Ligue 1+ 2" a "10"
+        "Ligue 1+ Pass 1": "Ligue 1+", **{f"Ligue 1+ Pass {n}": f"Ligue 1+ {n}" for n in range(2, 11)},
     },
     "DE": {
         "Auto Motor Sport TV": "auto motor und sport", "CRIME INVESTIGATION": "Crime+Investigation",
@@ -698,9 +700,10 @@ def load_tv_logos(cc, folder):
             stem = re.sub(rf"-({suffix})$", "", fname[:-4])
             is_hd = bool(re.search(r"(^|-)hd(-|$)", stem))
             # o tv-logos escreve "+" como "plus" ("canal-plus-fr"), a lista usa "+"
-            # ("CANAL+" -> "canalmais", "premieren-plus24" -> "+24"); as duas formas
-            # entram, porque "plus" também é nome próprio ("toggo-plus" = "TOGGO plus")
-            stems = {stem, re.sub(r"(^|-)plus(?=-|\d|$)", r"\1+", stem)}
+            # ("CANAL+" -> "canalmais", "premieren-plus24" -> "+24", "ligue-1plus" ->
+            # "Ligue 1+"); as duas formas entram, porque "plus" também é nome próprio
+            # ("toggo-plus" = "TOGGO plus")
+            stems = {stem, re.sub(r"(^|-|\d)plus(?=-|\d|$)", r"\1+", stem)}
             # com e sem aliases: "BBC One" tem alias para a região de Londres,
             # mas o logótipo "bbcone" também serve de marca para as outras regiões
             keys = {norm(s.replace("-", " "), cc, aliases=a) for s in stems for a in (True, False)}
