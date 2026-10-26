@@ -899,9 +899,18 @@ def main():
             label = label or epg[key][0][1]
             cid = make_id(label, cc)
             chosen[(cc, key)] = (cid, src)
-            ch = ET.SubElement(tv, "channel", id=cid)
             display = [pretty(label)]
             display += [n for n in provider_names.get((cc, key), []) if n != display[0]]
+            # nomes diferentes do mesmo canal ("Sky PREMIEREN +24" e "S Cinema
+            # Premieren +24"): uma só entrada com todos os nomes, sem repetir a grelha
+            ch = tv.find(f"channel[@id='{cid}']")
+            if ch is not None:
+                have = {d.text for d in ch.findall("display-name")}
+                for n in display:
+                    if n not in have:
+                        ET.SubElement(ch, "display-name", lang=COUNTRIES[cc]["lang"]).text = n
+                continue
+            ch = ET.SubElement(tv, "channel", id=cid)
             for n in display:
                 ET.SubElement(ch, "display-name", lang=COUNTRIES[cc]["lang"]).text = n
             if (cc, key) in logo_of:
@@ -909,6 +918,24 @@ def main():
             programmes.append((cid, progs))
     if not chosen:
         sys.exit("Nenhuma fonte EPG respondeu – epg.xml não foi alterado.")
+
+    # Canais sem programação em nenhuma fonte mas com logótipo (ex.: Ligue 1+ Pass
+    # 1-10): entram só com os nomes e o logótipo, para o TiviMate mostrar o logótipo
+    ids = {cid for cid, _ in chosen.values()}
+    logo_only = {}
+    for (cc, key), names in sorted(provider_names.items()):
+        if (cc, key) in chosen or (cc, key) not in logo_of:
+            continue
+        label = pretty(min((n for n in names if " " in n), key=len, default=names[0]))
+        cid = make_id(label, cc)
+        if cid in ids:
+            continue
+        ids.add(cid)
+        logo_only[(cc, key)] = cid
+        ch = ET.SubElement(tv, "channel", id=cid)
+        for n in [label] + [n for n in names if n != label]:
+            ET.SubElement(ch, "display-name", lang=COUNTRIES[cc]["lang"]).text = n
+        ET.SubElement(ch, "icon", src=logo_of[(cc, key)])
 
     for cid, progs in programmes:
         for p in sorted(progs, key=lambda p: p.get("start")):
@@ -922,7 +949,8 @@ def main():
     with open(args.epg, "wb") as f:
         f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
         f.write(ET.tostring(tv, encoding="utf-8"))
-    log(f"{args.epg}: {len(chosen)} canais, {sum(len(p) for _, p in programmes)} programas")
+    log(f"{args.epg}: {len(chosen)} canais, {sum(len(p) for _, p in programmes)} programas, "
+        f"{len(logo_only)} canais só com logótipo")
 
     # Atualiza a lista
     rows, stats = [], {}
@@ -931,8 +959,8 @@ def main():
         line = lines[i]
         tvg_id, src = chosen.get((cc, key), ("", ""))
         logo = logo_of.get((cc, key))
-        if tvg_id:
-            line = set_attr(line, "tvg-id", tvg_id)
+        if tvg_id or (cc, key) in logo_only:
+            line = set_attr(line, "tvg-id", tvg_id or logo_only[(cc, key)])
         if logo:
             line = set_attr(line, "tvg-logo", logo)
         lines[i] = line
