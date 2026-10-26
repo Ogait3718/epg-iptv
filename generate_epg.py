@@ -154,10 +154,20 @@ IOL_CDN = "https://cdn.iol.pt/img/logostvi/branco/{}.png"  # versão branca, par
 TV_LOGO = "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{}.png"
 # logótipos feitos por nós (pasta logos/), quando o tv-logo/tv-logos não tem o canal
 REPO_LOGOS = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/{}.png"
-# Além dos oficiais, aqui ficam as versões para fundo escuro (o TiviMate tem fundo
-# preto) dos canais cujo logótipo escolhido tinha letras pretas/escuras:
-# TV_LOGO = ficheiro do tv-logos de outra pasta; REPO_LOGOS = feito por nós, a
-# partir do logótipo oficial com os elementos escuros passados a branco.
+# logótipos atuais na Wikimedia Commons (confirmados na infobox da Wikipédia)
+COMMONS = "https://upload.wikimedia.org/wikipedia/commons/thumb/{0}/960px-{1}.png"
+CNBC_2025 = COMMONS.format("b/bc/CNBC_2025.svg", "CNBC_2025.svg")
+ID_2020 = COMMONS.format("3/35/InvestigationDiscoveryLogo2020.svg", "InvestigationDiscoveryLogo2020.svg")
+EURONEWS_2025 = COMMONS.format("3/3c/Euronews_Logo_2025.svg", "Euronews_Logo_2025.svg")
+TRACE_URBAN_2022 = "https://upload.wikimedia.org/wikipedia/commons/9/9a/Traceurban2022.png"
+# Ciné+ Premier passou a chamar-se OCS em julho de 2024
+OCS_2024 = COMMONS.format("3/37/OCS_2024.svg", "OCS_2024.svg")
+# Além dos oficiais, aqui ficam correções: logótipos desatualizados ou errados e
+# versões para fundo escuro (o TiviMate tem fundo preto). TV_LOGO = ficheiro do
+# tv-logos de outra pasta; REPO_LOGOS = feito por nós a partir do logótipo oficial
+# atual, só com o preto passado a branco (ou o negativo, nos logótipos a preto e
+# branco), como as próprias marcas fazem em fundo escuro. Logótipos com cores
+# escuras da marca (ex.: azul-escuro) ficam como estão.
 OFFICIAL_LOGOS = {
     "PT": {
         "RTP 1": RTP_CDN.format("rtp1"), "RTP 2": RTP_CDN.format("rtp2"),
@@ -172,19 +182,25 @@ OFFICIAL_LOGOS = {
         "VH1": TV_LOGO.format("united-kingdom/vh1-uk"),
         # o "tpa-es" do tv-logos/spain é a TPA das Astúrias
         "TPA Internacional": "https://i.imgur.com/M7aB0LN.png",
-        # versões para fundo escuro
-        "CNBC Europe": TV_LOGO.format("world-europe/cnbc-eu"),
+        "CNBC Europe": CNBC_2025, "ID Investigation Discovery": ID_2020,
+        "Euronews": EURONEWS_2025, "Trace Urban": TRACE_URBAN_2022,
+        "Discovery Channel": REPO_LOGOS.format("discovery-channel-eu"),
+        "Nat Geo Wild": TV_LOGO.format("netherlands/national-geographic-wild-nl"),
+        "Travel Channel": COMMONS.format("8/8a/2018_Travel_Channel_logo.svg", "2018_Travel_Channel_logo.svg"),
         "DAZN 5": TV_LOGO.format("belgium/dazn-5-be"),
         "Motorvision TV": TV_LOGO.format("germany/motorvision-tv-de"),
         "ARTV": REPO_LOGOS.format("artv-pt"), "W-Sport": REPO_LOGOS.format("w-sport-pt"),
         "BOMSOM TV": REPO_LOGOS.format("bomsom-tv-pt"),
-        "TCV Internacional": REPO_LOGOS.format("tcv-internacional-pt"),
     },
     "BE": {
+        "Discovery Channel": REPO_LOGOS.format("discovery-channel-eu"),
         "Nat Geo Wild": TV_LOGO.format("netherlands/national-geographic-wild-nl"),
         "AB3": REPO_LOGOS.format("ab3-be"), "AB3 Family": REPO_LOGOS.format("ab3-be"),
-        "RTL district": REPO_LOGOS.format("rtl-district-be"),
-        "Tele Cine Fun": REPO_LOGOS.format("tele-cine-fun-be"),
+        # a pasta belgium tem os Ciné+ com o desenho de 2011
+        "Ciné+ Classic": TV_LOGO.format("france/cine-plus-classic-fr"),
+        "Ciné+ Frisson": TV_LOGO.format("france/cine-plus-frisson-fr"), "Ciné+ Premier": OCS_2024,
+        "Euronews": EURONEWS_2025, "Trace Urban": TRACE_URBAN_2022,
+        "Love Nature": COMMONS.format("0/0d/Love_Nature_logo_%282025%29.svg", "Love_Nature_logo_%282025%29.svg"),
     },
     "BR": {
         "E!": TV_LOGO.format("united-states/e-entertainment-us"),
@@ -193,20 +209,26 @@ OFFICIAL_LOGOS = {
         # canal de futebol da Globo; o iptv-org dava o Sky Cinema alemão (e links partidos)
         **{f"Premiere {n}": TV_LOGO.format("brazil/premiere-br") for n in range(1, 8)},
         "Premier 1": TV_LOGO.format("brazil/premiere-br"),
-        "ID": TV_LOGO.format("international/investigation-discovery-int"),
+        "ID": ID_2020,
     },
     "FR": {
-        "Discovery Channel": TV_LOGO.format("netherlands/discovery-channel-nl"),
+        "Discovery Channel": REPO_LOGOS.format("discovery-channel-eu"),
+        "Discovery Investigation": ID_2020,
         "National Geographic": TV_LOGO.format("united-kingdom/national-geographic-uk"),
         "Nat Geo Wild": TV_LOGO.format("netherlands/national-geographic-wild-nl"),
         "E!": TV_LOGO.format("united-kingdom/e-entertainment-uk"),
         "Luxe TV": TV_LOGO.format("luxembourg/luxe-tv-lu"),
-        "Viceland": TV_LOGO.format("united-kingdom/viceland-uk"),
-        "Gong": REPO_LOGOS.format("gong-fr"), "TV78": REPO_LOGOS.format("tv78-fr"),
+        "Viceland": REPO_LOGOS.format("vice-tv"),  # a marca é agora Vice TV
+        "Gong": REPO_LOGOS.format("gong-fr"),
         "VH1": TV_LOGO.format("united-kingdom/vh1-uk"),
-        # mudaram de nome: Chérie 25 -> RMC Life, CStar Hits France -> Europe 2 Pop TV
+        "Euronews": EURONEWS_2025,
+        # mudaram de nome: Chérie 25 -> RMC Life, CStar Hits France -> Europe 2 Pop TV,
+        # Ciné+ Premier -> OCS, Ciné+ Famiz -> Ciné+ Family, Ciné+ Club -> Ciné+ Festival
         "Chérie 25": TV_LOGO.format("france/rmc-life-fr"),
         "CSTAR Hits France": REPO_LOGOS.format("europe-2-pop-tv-fr"),
+        "Ciné+ Premier": OCS_2024,
+        "Ciné+ Famiz": TV_LOGO.format("france/cine-plus-family-fr"),
+        "Ciné+ Club": TV_LOGO.format("france/cine-plus-festival-fr"),
     },
     "DE": {
         "NatGeo": TV_LOGO.format("germany/national-geographic-de"),
@@ -214,17 +236,18 @@ OFFICIAL_LOGOS = {
         "QVC 2": TV_LOGO.format("germany/qvc-zwei-de"),
         "QVC Beauty & Style": TV_LOGO.format("germany/qvc-style-de"),
         "Eurosport 2 Xtra": REPO_LOGOS.format("eurosport-2-xtra-de"),
-        "Sportdigital1+": REPO_LOGOS.format("sportdigital-1-plus-de"),
-        "SportDigital Fussball 2": REPO_LOGOS.format("sportdigital-fussball-2-de"),
         "Sky PREMIEREN +24": TV_LOGO.format("germany/sky-cinema-premieren-plus24-de"),
+        # o "rtl-plus-de" do tv-logos não é o logótipo atual (RTL+ 2021)
+        "RTL+": REPO_LOGOS.format("rtl-plus-de"),
+        "Euronews": EURONEWS_2025,
     },
     "UK": {
         "E!": TV_LOGO.format("united-kingdom/e-entertainment-uk"),
-        "Nat Geo Wild": TV_LOGO.format("united-kingdom/national-geographic-wild-uk"),
-        "CNBC": TV_LOGO.format("world-europe/cnbc-eu"),
-        "BBC Lifestyle": TV_LOGO.format("poland/bbc-lifestyle-pl"),
+        "Nat Geo Wild": TV_LOGO.format("netherlands/national-geographic-wild-nl"),
+        "CNBC": CNBC_2025,
+        "BBC Lifestyle": REPO_LOGOS.format("bbc-lifestyle"),
         "Luxe TV": TV_LOGO.format("luxembourg/luxe-tv-lu"),
-        "TCM": TV_LOGO.format("united-kingdom/tcm-movies-uk"),
+        "TCM": TV_LOGO.format("united-kingdom/tcm-movies-uk"),  # no UK o canal é TCM Movies
         "TRT World": TV_LOGO.format("turkey/trt-world-tr"),
         # "TNT Sports 4K UHD" (a chave fica "tntsports"): o canal 4K do UK é o
         # TNT Sports Ultimate; antes caía no logótipo da TNT Sports latino-americana
