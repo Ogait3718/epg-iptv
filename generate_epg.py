@@ -44,10 +44,12 @@ EPGSHARE = "https://epgshare01.online/epgshare01/epg_ripper_{}.xml.gz"
 #   suffix  – canais de outros grupos cujo nome termina neste código também entram
 #   epg     – fontes XMLTV (nome, url, tipo); tipo "meo" = IDs são códigos MEO
 #   logos   – pasta em tv-logo/tv-logos/countries; iptv – código de país no iptv-org
+#   logos_extra – outras pastas do tv-logos, para canais que a do país não tem
 COUNTRIES = {
     "PT": {
         "groups": r"^Portugal( HEVC)?$", "suffix": "PT", "lang": "pt",
         "logos": "portugal", "iptv": "PT",
+        "logos_extra": ["spain", "international"],
         "epg": [
             ("open-epg-meo", OPEN_EPG.format("portugal2"), "meo"),
             ("open-epg-nos", OPEN_EPG.format("portugal1"), "names"),
@@ -58,6 +60,7 @@ COUNTRIES = {
     "BE": {
         "groups": r"^Belgium$", "suffix": "BE", "lang": "fr",
         "logos": "belgium", "iptv": "BE",
+        "logos_extra": ["france", "netherlands", "international"],
         "epg": [
             ("open-epg-be2", OPEN_EPG.format("belgium2"), "names"),
             ("open-epg-be1", OPEN_EPG.format("belgium1"), "names"),
@@ -67,6 +70,7 @@ COUNTRIES = {
     "BR": {
         "groups": r"^Brazil$", "suffix": "BR", "lang": "pt",
         "logos": "brazil", "iptv": "BR",
+        "logos_extra": ["world-latin-america", "united-states"],
         "epg": [
             ("open-epg-br1", OPEN_EPG.format("brazil1"), "names"),
             ("open-epg-br3", OPEN_EPG.format("brazil3"), "names"),
@@ -78,6 +82,7 @@ COUNTRIES = {
     "FR": {
         "groups": r"^France( HEVC)?$", "suffix": "FR", "lang": "fr",
         "logos": "france", "iptv": "FR",
+        "logos_extra": ["international"],
         "epg": [
             ("open-epg-fr1", OPEN_EPG.format("france1"), "names"),
             ("open-epg-fr2", OPEN_EPG.format("france2"), "names"),
@@ -88,6 +93,7 @@ COUNTRIES = {
     "DE": {
         "groups": r"^Germany( HEVC| VIP)?$", "suffix": "DE", "lang": "de",
         "logos": "germany", "iptv": "DE",
+        "logos_extra": ["austria", "international"],
         "epg": [
             ("open-epg-de3", OPEN_EPG.format("germany3"), "names"),
             ("open-epg-de1", OPEN_EPG.format("germany1"), "names"),
@@ -97,6 +103,7 @@ COUNTRIES = {
     "UK": {
         "groups": r"^(United Kingdom( VIP)?|Script UK)$", "suffix": "UK", "lang": "en",
         "logos": "united-kingdom", "iptv": "UK",
+        "logos_extra": ["international"],
         "epg": [
             ("open-epg-uk3", OPEN_EPG.format("unitedkingdom3"), "names"),
             ("open-epg-uk1", OPEN_EPG.format("unitedkingdom1"), "names"),
@@ -142,8 +149,14 @@ OFFICIAL_LOGO_HOSTS = (
 )
 RTP_CDN = "https://cdn-images.rtp.pt/common/img/channels/logos/color/horizontal/{}_2026.png"
 IOL_CDN = "https://cdn.iol.pt/img/logostvi/branco/{}.png"  # versão branca, para fundo escuro
+# um ficheiro de uma pasta qualquer do tv-logo/tv-logos ("pasta/nome", sem .png)
+TV_LOGO = "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{}.png"
 # logótipos feitos por nós (pasta logos/), quando o tv-logo/tv-logos não tem o canal
 REPO_LOGOS = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/{}.png"
+# Além dos oficiais, aqui ficam as versões para fundo escuro (o TiviMate tem fundo
+# preto) dos canais cujo logótipo escolhido tinha letras pretas/escuras:
+# TV_LOGO = ficheiro do tv-logos de outra pasta; REPO_LOGOS = feito por nós, a
+# partir do logótipo oficial com os elementos escuros passados a branco.
 OFFICIAL_LOGOS = {
     "PT": {
         "RTP 1": RTP_CDN.format("rtp1"), "RTP 2": RTP_CDN.format("rtp2"),
@@ -155,6 +168,56 @@ OFFICIAL_LOGOS = {
         "V+TVI": IOL_CDN.format("vmaistvi"),
         # mesmo desenho dos SPORT TV 1-6 do tv-logo/tv-logos (512x96, letras brancas)
         "SPORT TV7": REPO_LOGOS.format("sport-tv-7-pt"),
+        # o "tpa-es" do tv-logos/spain é a TPA das Astúrias
+        "TPA Internacional": "https://i.imgur.com/M7aB0LN.png",
+        # versões para fundo escuro
+        "CNBC Europe": TV_LOGO.format("world-europe/cnbc-eu"),
+        "DAZN 5": TV_LOGO.format("belgium/dazn-5-be"),
+        "Motorvision TV": TV_LOGO.format("germany/motorvision-tv-de"),
+        "ARTV": REPO_LOGOS.format("artv-pt"), "W-Sport": REPO_LOGOS.format("w-sport-pt"),
+        "BOMSOM TV": REPO_LOGOS.format("bomsom-tv-pt"),
+        "TCV Internacional": REPO_LOGOS.format("tcv-internacional-pt"),
+    },
+    "BE": {
+        "Nat Geo Wild": TV_LOGO.format("netherlands/national-geographic-wild-nl"),
+        "AB3": REPO_LOGOS.format("ab3-be"), "AB3 Family": REPO_LOGOS.format("ab3-be"),
+        "RTL district": REPO_LOGOS.format("rtl-district-be"),
+        "Tele Cine Fun": REPO_LOGOS.format("tele-cine-fun-be"),
+    },
+    "BR": {
+        "E!": TV_LOGO.format("united-states/e-entertainment-us"),
+        "A&E": TV_LOGO.format("brazil/a-and-e-br"),
+        "Curta!": REPO_LOGOS.format("curta-br"),
+    },
+    "FR": {
+        "Discovery Channel": TV_LOGO.format("netherlands/discovery-channel-nl"),
+        "National Geographic": TV_LOGO.format("united-kingdom/national-geographic-uk"),
+        "Nat Geo Wild": TV_LOGO.format("netherlands/national-geographic-wild-nl"),
+        "E!": TV_LOGO.format("united-kingdom/e-entertainment-uk"),
+        "Luxe TV": TV_LOGO.format("luxembourg/luxe-tv-lu"),
+        "Viceland": TV_LOGO.format("united-kingdom/viceland-uk"),
+        "Gong": REPO_LOGOS.format("gong-fr"), "TV78": REPO_LOGOS.format("tv78-fr"),
+    },
+    "DE": {
+        "NatGeo": TV_LOGO.format("germany/national-geographic-de"),
+        **{f"DAZN {n}": TV_LOGO.format(f"belgium/dazn-{n}-be") for n in range(3, 7)},
+        "QVC 2": TV_LOGO.format("germany/qvc-zwei-de"),
+        "QVC Beauty & Style": TV_LOGO.format("germany/qvc-style-de"),
+        "Eurosport 2 Xtra": REPO_LOGOS.format("eurosport-2-xtra-de"),
+        "Sportdigital1+": REPO_LOGOS.format("sportdigital-1-plus-de"),
+        "SportDigital Fussball 2": REPO_LOGOS.format("sportdigital-fussball-2-de"),
+    },
+    "UK": {
+        "E!": TV_LOGO.format("united-kingdom/e-entertainment-uk"),
+        "Nat Geo Wild": TV_LOGO.format("united-kingdom/national-geographic-wild-uk"),
+        "CNBC": TV_LOGO.format("world-europe/cnbc-eu"),
+        "BBC Lifestyle": TV_LOGO.format("poland/bbc-lifestyle-pl"),
+        "Luxe TV": TV_LOGO.format("luxembourg/luxe-tv-lu"),
+        "TCM": TV_LOGO.format("united-kingdom/tcm-movies-uk"),
+        "TRT World": TV_LOGO.format("turkey/trt-world-tr"),
+        # "TNT Sports 4K UHD" (a chave fica "tntsports"): o canal 4K do UK é o
+        # TNT Sports Ultimate; antes caía no logótipo da TNT Sports latino-americana
+        "TNT Sports": TV_LOGO.format("united-kingdom/tnt-sports-ultimate-uk"),
     },
 }
 
@@ -566,28 +629,34 @@ def best_source(cands, now):
 # Logótipos
 # --------------------------------------------------------------------------
 
-def load_tv_logos(cc):
-    folder = COUNTRIES[cc]["logos"]
+def load_tv_logos(cc, folder):
     headers = {"Accept": "application/vnd.github+json"}
     if os.environ.get("GITHUB_TOKEN"):
         headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
     data = fetch(TV_LOGOS_API.format(folder), headers)
     tvlogos = {}
     if data:
-        suffix = "gb|uk" if cc == "UK" else cc.lower()
+        # nas pastas de outros países o sufixo é o código desse país ("-es", "-us", "-lam")
+        own = folder == COUNTRIES[cc]["logos"]
+        suffix = ("gb|uk" if cc == "UK" else cc.lower()) if own else "[a-z]+"
         for item in json.loads(data):
             fname = item.get("name", "")
             if not fname.endswith(".png") or "-icon" in fname:
                 continue
             stem = re.sub(rf"-({suffix})$", "", fname[:-4])
             is_hd = bool(re.search(r"(^|-)hd(-|$)", stem))
+            # o tv-logos escreve "+" como "plus" ("canal-plus-fr"), a lista usa "+"
+            # ("CANAL+" -> "canalmais"); as duas formas entram, porque "plus" também
+            # é nome próprio ("toggo-plus" = "TOGGO plus")
+            stems = {stem, re.sub(r"(^|-)plus(?=-|$)", r"\1+", stem)}
             # com e sem aliases: "BBC One" tem alias para a região de Londres,
             # mas o logótipo "bbcone" também serve de marca para as outras regiões
-            for key in {norm(stem.replace("-", " "), cc), norm(stem.replace("-", " "), cc, aliases=False)}:
+            keys = {norm(s.replace("-", " "), cc, aliases=a) for s in stems for a in (True, False)}
+            for key in keys:
                 # a versão sem "HD" no logótipo é a mais limpa; usa a HD só se for a única
                 if key not in tvlogos or (tvlogos[key][1] and not is_hd):
                     tvlogos[key] = (TV_LOGOS_RAW.format(folder) + fname, is_hd)
-    log(f"- tv-logo/tv-logos {cc}: {len(tvlogos)} logótipos")
+    log(f"- tv-logo/tv-logos {cc} ({folder}): {len(tvlogos)} logótipos")
     return {k: v[0] for k, v in tvlogos.items()}
 
 
@@ -626,8 +695,14 @@ def load_logos():
         for n, url in OFFICIAL_LOGOS.get(cc, {}).items():
             for key in {norm(n, cc), norm(n, cc, aliases=False)}:
                 curated[key] = url
-        tvlogos = load_tv_logos(cc)
-        logos[cc] = {**iptv, **tvlogos, **own_official, **curated}
+        tvlogos = load_tv_logos(cc, cfg["logos"])
+        # pastas de países vizinhos: só para canais que a do próprio país não tem
+        # (ex.: France 2 na Bélgica), antes dos logótipos genéricos do iptv-org
+        extra = {}
+        for folder in cfg.get("logos_extra", ()):
+            for key, url in load_tv_logos(cc, folder).items():
+                extra.setdefault(key, url)
+        logos[cc] = {**iptv, **extra, **tvlogos, **own_official, **curated}
         local[cc] = {**own, **tvlogos, **own_official, **curated}
         log(f"  {cc}: {len(curated)} logótipos oficiais, {len(own_official)} do iptv-org em domínio oficial")
     log(f"- iptv-org: {len(best)} canais com logótipo PNG")
