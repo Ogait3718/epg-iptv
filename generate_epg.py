@@ -93,7 +93,7 @@ COUNTRIES = {
     "DE": {
         "groups": r"^Germany( HEVC| VIP)?$", "suffix": "DE", "lang": "de",
         "logos": "germany", "iptv": "DE",
-        "logos_extra": ["austria", "international"],
+        "logos_extra": ["germany/sky-sport", "austria", "international"],
         "epg": [
             ("open-epg-de3", OPEN_EPG.format("germany3"), "names"),
             ("open-epg-de1", OPEN_EPG.format("germany1"), "names"),
@@ -130,7 +130,8 @@ SPORT_CODES = {"PT": "PT", "BE": "BE", "BR": "BR", "FR": "FR", "DE": "DE", "UK":
 # "TNT Sports" também existe no Brasil, mas nestes grupos sem código é o do UK.
 SPORT_BRANDS = {"UK": r"^(Sky|TNT) Sports\b"}
 
-TV_LOGOS_API = "https://api.github.com/repos/tv-logo/tv-logos/contents/countries/{}"
+# lista de todos os ficheiros do repositório num só pedido (a API tem limite de 60/h sem token)
+TV_LOGOS_API = "https://api.github.com/repos/tv-logo/tv-logos/git/trees/main?recursive=1"
 TV_LOGOS_RAW = "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{}/"
 IPTV_ORG_CHANNELS = "https://iptv-org.github.io/api/channels.json"
 IPTV_ORG_LOGOS = "https://iptv-org.github.io/api/logos.json"
@@ -168,6 +169,7 @@ OFFICIAL_LOGOS = {
         "V+TVI": IOL_CDN.format("vmaistvi"),
         # mesmo desenho dos SPORT TV 1-6 do tv-logo/tv-logos (512x96, letras brancas)
         "SPORT TV7": REPO_LOGOS.format("sport-tv-7-pt"),
+        "VH1": TV_LOGO.format("united-kingdom/vh1-uk"),
         # o "tpa-es" do tv-logos/spain é a TPA das Astúrias
         "TPA Internacional": "https://i.imgur.com/M7aB0LN.png",
         # versões para fundo escuro
@@ -188,6 +190,10 @@ OFFICIAL_LOGOS = {
         "E!": TV_LOGO.format("united-states/e-entertainment-us"),
         "A&E": TV_LOGO.format("brazil/a-and-e-br"),
         "Curta!": REPO_LOGOS.format("curta-br"),
+        # canal de futebol da Globo; o iptv-org dava o Sky Cinema alemão (e links partidos)
+        **{f"Premiere {n}": TV_LOGO.format("brazil/premiere-br") for n in range(1, 8)},
+        "Premier 1": TV_LOGO.format("brazil/premiere-br"),
+        "ID": TV_LOGO.format("international/investigation-discovery-int"),
     },
     "FR": {
         "Discovery Channel": TV_LOGO.format("netherlands/discovery-channel-nl"),
@@ -197,6 +203,10 @@ OFFICIAL_LOGOS = {
         "Luxe TV": TV_LOGO.format("luxembourg/luxe-tv-lu"),
         "Viceland": TV_LOGO.format("united-kingdom/viceland-uk"),
         "Gong": REPO_LOGOS.format("gong-fr"), "TV78": REPO_LOGOS.format("tv78-fr"),
+        "VH1": TV_LOGO.format("united-kingdom/vh1-uk"),
+        # mudaram de nome: Chérie 25 -> RMC Life, CStar Hits France -> Europe 2 Pop TV
+        "Chérie 25": TV_LOGO.format("france/rmc-life-fr"),
+        "CSTAR Hits France": REPO_LOGOS.format("europe-2-pop-tv-fr"),
     },
     "DE": {
         "NatGeo": TV_LOGO.format("germany/national-geographic-de"),
@@ -206,6 +216,7 @@ OFFICIAL_LOGOS = {
         "Eurosport 2 Xtra": REPO_LOGOS.format("eurosport-2-xtra-de"),
         "Sportdigital1+": REPO_LOGOS.format("sportdigital-1-plus-de"),
         "SportDigital Fussball 2": REPO_LOGOS.format("sportdigital-fussball-2-de"),
+        "Sky PREMIEREN +24": TV_LOGO.format("germany/sky-cinema-premieren-plus24-de"),
     },
     "UK": {
         "E!": TV_LOGO.format("united-kingdom/e-entertainment-uk"),
@@ -218,6 +229,9 @@ OFFICIAL_LOGOS = {
         # "TNT Sports 4K UHD" (a chave fica "tntsports"): o canal 4K do UK é o
         # TNT Sports Ultimate; antes caía no logótipo da TNT Sports latino-americana
         "TNT Sports": TV_LOGO.format("united-kingdom/tnt-sports-ultimate-uk"),
+        "Nasa TV": TV_LOGO.format("united-states/nasa-tv-us"),
+        # canal "Script" sem equivalente real; o iptv-org dava um canal de Hong Kong
+        "Classic Movies": "",
     },
 }
 
@@ -279,6 +293,7 @@ ALIASES_PT = {
     "tcvinternational": "tcvinternacional", "now": "newsnow", "dizichannel": "dizi",
     "artvparlamento": "artv", "btv": "btv1", "canalsmais": "smais",
     "cnn": "cnnportugal", "tpa": "tpainternacional",
+    "sporttv": "sporttv1",  # "SportTV UHD 4K": o fornecedor dá-lhe o tvg-id da SPORT TV 1
 }
 
 # Outros países: nome na lista -> nome na fonte EPG (normalizados no arranque).
@@ -629,26 +644,40 @@ def best_source(cands, now):
 # Logótipos
 # --------------------------------------------------------------------------
 
+_tv_logos_files = None
+
+def tv_logos_files():
+    """{pasta: [ficheiros]} de todo o tv-logo/tv-logos/countries, pedido uma vez só."""
+    global _tv_logos_files
+    if _tv_logos_files is None:
+        headers = {"Accept": "application/vnd.github+json"}
+        if os.environ.get("GITHUB_TOKEN"):
+            headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
+        data = fetch(TV_LOGOS_API, headers)
+        _tv_logos_files = {}
+        for item in json.loads(data)["tree"] if data else []:
+            folder, _, fname = item["path"].removeprefix("countries/").rpartition("/")
+            if item["path"].startswith("countries/") and item["type"] == "blob":
+                _tv_logos_files.setdefault(folder, []).append(fname)
+    return _tv_logos_files
+
+
 def load_tv_logos(cc, folder):
-    headers = {"Accept": "application/vnd.github+json"}
-    if os.environ.get("GITHUB_TOKEN"):
-        headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
-    data = fetch(TV_LOGOS_API.format(folder), headers)
     tvlogos = {}
-    if data:
+    files = tv_logos_files().get(folder)
+    if files:
         # nas pastas de outros países o sufixo é o código desse país ("-es", "-us", "-lam")
         own = folder == COUNTRIES[cc]["logos"]
         suffix = ("gb|uk" if cc == "UK" else cc.lower()) if own else "[a-z]+"
-        for item in json.loads(data):
-            fname = item.get("name", "")
+        for fname in files:
             if not fname.endswith(".png") or "-icon" in fname:
                 continue
             stem = re.sub(rf"-({suffix})$", "", fname[:-4])
             is_hd = bool(re.search(r"(^|-)hd(-|$)", stem))
             # o tv-logos escreve "+" como "plus" ("canal-plus-fr"), a lista usa "+"
-            # ("CANAL+" -> "canalmais"); as duas formas entram, porque "plus" também
-            # é nome próprio ("toggo-plus" = "TOGGO plus")
-            stems = {stem, re.sub(r"(^|-)plus(?=-|$)", r"\1+", stem)}
+            # ("CANAL+" -> "canalmais", "premieren-plus24" -> "+24"); as duas formas
+            # entram, porque "plus" também é nome próprio ("toggo-plus" = "TOGGO plus")
+            stems = {stem, re.sub(r"(^|-)plus(?=-|\d|$)", r"\1+", stem)}
             # com e sem aliases: "BBC One" tem alias para a região de Londres,
             # mas o logótipo "bbcone" também serve de marca para as outras regiões
             keys = {norm(s.replace("-", " "), cc, aliases=a) for s in stems for a in (True, False)}
