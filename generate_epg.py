@@ -213,6 +213,8 @@ OFFICIAL_LOGOS = {
         "Santuario Fatima": REPO_LOGOS.format("santuario-fatima-pt"),
         "TV Maná": "https://i.imgur.com/6jNqpTP.png",
         "AD Almada TV": "https://i.imgur.com/AlKQZcZ.jpeg",
+        # o tv-logos e o iptv-org não o têm; é o logótipo que vinha na lista do fornecedor
+        "Dizi": "https://i.imgur.com/2Hyii2W.png",
     },
     "BE": {
         "Discovery Channel": REPO_LOGOS.format("discovery-channel-eu"),
