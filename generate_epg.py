@@ -191,6 +191,23 @@ OFFICIAL_LOGOS = {
         "Motorvision TV": TV_LOGO.format("germany/motorvision-tv-de"),
         "ARTV": REPO_LOGOS.format("artv-pt"), "W-Sport": REPO_LOGOS.format("w-sport-pt"),
         "BOMSOM TV": REPO_LOGOS.format("bomsom-tv-pt"),
+        # "BackUP- Sport 1": cópia da SPORT TV 1, mesmo logótipo
+        "Sport 1": TV_LOGO.format("portugal/sport-tv-1-pt"),
+        # "CNN PT" e "S News PT" são a CNN dos EUA e a Sky News do Reino Unido (ver ALIASES_PT)
+        "CNN US": TV_LOGO.format("united-states/cnn-us"),
+        "Sky News": TV_LOGO.format("united-kingdom/sky-news-uk"),
+        "Fox News": TV_LOGO.format("united-states/fox-news-us"),
+        "Ginx": TV_LOGO.format("international/ginx-e-sports-tv-int"),
+        # o iptv-org dava a HGTV do Vietname (Hậu Giang TV)
+        "HGTV": TV_LOGO.format("united-kingdom/hgtv-uk"),
+        "TVE 24h": TV_LOGO.format("spain/24h-es"),  # o canal da RTVE chama-se agora "24h"
+        # todos os "LiveCam <praia>" (a marca chega pelo prefixo, em find_logo)
+        "LiveCam": REPO_LOGOS.format("meo-beachcam-pt"),
+        "OneToro TV": REPO_LOGOS.format("onetoro-tv-pt"),
+        "RTP Arena": REPO_LOGOS.format("rtp-arena-pt"),
+        "Santuario Fatima": REPO_LOGOS.format("santuario-fatima-pt"),
+        "TV Maná": "https://i.imgur.com/6jNqpTP.png",
+        "AD Almada TV": "https://i.imgur.com/AlKQZcZ.jpeg",
     },
     "BE": {
         "Discovery Channel": REPO_LOGOS.format("discovery-channel-eu"),
@@ -315,7 +332,7 @@ ALIASES_PT = {
     "onetoro": "onetorotv", "nhkworldjapan": "nhkworldtv", "cnbceurope": "cnbc",
     "tcvinternational": "tcvinternacional", "now": "newsnow", "dizichannel": "dizi",
     "artvparlamento": "artv", "btv": "btv1", "canalsmais": "smais",
-    "cnn": "cnnportugal", "tpa": "tpainternacional",
+    "cnn": "cnnus", "snews": "skynews", "tpa": "tpainternacional",
     "sporttv": "sporttv1",  # "SportTV UHD 4K": o fornecedor dá-lhe o tvg-id da SPORT TV 1
 }
 
