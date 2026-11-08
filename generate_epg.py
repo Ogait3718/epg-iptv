@@ -154,6 +154,11 @@ IOL_CDN = "https://cdn.iol.pt/img/logostvi/branco/{}.png"  # versão branca, par
 TV_LOGO = "https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/{}.png"
 # logótipos feitos por nós (pasta logos/), quando o tv-logo/tv-logos não tem o canal
 REPO_LOGOS = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/{}.png"
+# cópias dos logótipos do imgur (pasta logos/imgur/, mesmo nome de ficheiro): o imgur
+# bloqueia (429) quem pede muitas imagens seguidas, e o TiviMate pede-as todas de uma
+# vez ao atualizar o EPG, por isso os logótipos desapareciam
+IMGUR_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logos", "imgur")
+IMGUR_MIRROR = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/imgur/{}"
 # logótipos atuais na Wikimedia Commons (confirmados na infobox da Wikipédia)
 COMMONS = "https://upload.wikimedia.org/wikipedia/commons/thumb/{0}/960px-{1}.png"
 CNBC_2025 = COMMONS.format("b/bc/CNBC_2025.svg", "CNBC_2025.svg")
@@ -799,6 +804,14 @@ def find_logo(key, table, local):
     return local[max(prefixes, key=len)] if prefixes else None
 
 
+def mirror_logo(url):
+    """Troca um link do imgur pela cópia em logos/imgur/, quando existe."""
+    fname = re.sub(r"^https?://i\.imgur\.com/", "", url)
+    if fname != url and os.path.isfile(os.path.join(IMGUR_DIR, fname)):
+        return IMGUR_MIRROR.format(fname)
+    return url
+
+
 def print_missing(rows):
     """Resumo por país dos canais sem EPG e/ou sem logótipo (variantes agrupadas)."""
     groups = {}
@@ -888,7 +901,11 @@ def main():
     for cc, key in provider_names:
         url = find_logo(key, logos[cc], local_logos[cc])
         if url:
-            logo_of[(cc, key)] = url
+            logo_of[(cc, key)] = mirror_logo(url)
+    # logótipos novos do imgur ainda sem cópia: descarregar para logos/imgur/
+    no_copy = sorted({u for u in logo_of.values() if "i.imgur.com" in u})
+    if no_copy:
+        log(f"- {len(no_copy)} logótipos do imgur sem cópia em logos/imgur/: {' '.join(no_copy)}")
     tv = ET.Element("tv", {"generator-info-name": "generate_epg.py",
                            "source-info-name": "open-epg.com, epgshare01.online"})
     # o ID vem do nome MEO quando existe, para não mudar de dia para dia
