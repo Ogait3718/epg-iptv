@@ -128,7 +128,8 @@ SPORT_COUNTRY_WORDS = {
 SPORT_CODES = {"PT": "PT", "BE": "BE", "BR": "BR", "FR": "FR", "DE": "DE", "UK": "UK", "GB": "UK"}
 # Marcas aceites mesmo sem código. "Sky Sports" (plural) é só do Reino Unido;
 # "TNT Sports" também existe no Brasil, mas nestes grupos sem código é o do UK.
-SPORT_BRANDS = {"UK": r"^(Sky|TNT) Sports\b"}
+# "S Sports" é a Sky Sports abreviada ("S Sports F1 1 VIP SPORTS").
+SPORT_BRANDS = {"UK": r"^(Sky|S|TNT) Sports\b"}
 
 # lista de todos os ficheiros do repositório num só pedido (a API tem limite de 60/h sem token)
 TV_LOGOS_API = "https://api.github.com/repos/tv-logo/tv-logos/git/trees/main?recursive=1"
@@ -288,6 +289,20 @@ OFFICIAL_LOGOS = {
         "Nasa TV": TV_LOGO.format("united-states/nasa-tv-us"),
         # canal "Script" sem equivalente real; o iptv-org dava um canal de Hong Kong
         "Classic Movies": "",
+        # cópias em logos/ (tv-logo/tv-logos, Wikipédia); o iptv-org e a lista não
+        # tinham logótipo que funcionasse
+        "Celtic TV": REPO_LOGOS.format("celtic-tv-uk"),  # emblema do Celtic FC
+        "Club MTV": REPO_LOGOS.format("club-mtv-uk"),
+        "Food Network +1": REPO_LOGOS.format("food-network-plus-1-uk"),
+        "Fox News": REPO_LOGOS.format("fox-news-uk"),
+        "Sky Cinema ScFi/Horror": REPO_LOGOS.format("sky-cinema-sci-fi-horror-uk"),
+        "Premier 1": REPO_LOGOS.format("premier-sports-1-uk"),  # canais "Script"
+        "Premier 2": REPO_LOGOS.format("premier-sports-2-uk"),
+        "TOWIE TV": REPO_LOGOS.format("towie-tv-uk"),  # The Only Way Is Essex
+        # sem isto caíam no logótipo antigo da Sky Sports (imgur, anterior a 2020)
+        "Sky Sports+ 1": REPO_LOGOS.format("sky-sports-plus-uk"),
+        "Sky Sports+ 24": REPO_LOGOS.format("sky-sports-plus-uk"),
+        **{f"Sky Sports F1 {n}": REPO_LOGOS.format("sky-sports-f1-uk") for n in range(1, 6)},
     },
 }
 
@@ -585,7 +600,8 @@ def sport_country(name):
     codes = {SPORT_CODES[t] for t in re.findall(r"\b([A-Z]{2})\b", name) if t in SPORT_CODES}
     if len(codes) == 1:
         return codes.pop()
-    if not codes and not re.search(r"\b[A-Z]{2}\b", name.replace("VIP", "")):
+    # "HD"/"SD" são qualidade, não país ("TNT Sports 1 HD VIP Sports")
+    if not codes and not re.search(r"\b(?!HD\b|SD\b)[A-Z]{2}\b", name.replace("VIP", "")):
         found = [cc for cc, rx in SPORT_BRANDS.items() if re.search(rx, name)]
         if len(found) == 1:
             return found[0]
