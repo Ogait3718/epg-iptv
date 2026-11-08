@@ -215,6 +215,7 @@ OFFICIAL_LOGOS = {
         "AD Almada TV": "https://i.imgur.com/AlKQZcZ.jpeg",
         # o tv-logos e o iptv-org não o têm; é o logótipo que vinha na lista do fornecedor
         "Dizi": "https://i.imgur.com/2Hyii2W.png",
+        "Campo Pequeno": REPO_LOGOS.format("campo-pequeno-tv-pt"),
     },
     "BE": {
         "Discovery Channel": REPO_LOGOS.format("discovery-channel-eu"),
@@ -253,6 +254,14 @@ OFFICIAL_LOGOS = {
         "Ciné+ Premier": OCS_2024,
         "Ciné+ Famiz": TV_LOGO.format("france/cine-plus-family-fr"),
         "Ciné+ Club": TV_LOGO.format("france/cine-plus-festival-fr"),
+        "ES1": REPO_LOGOS.format("mgg-tv-fr"),  # ES1 -> MGG TV (2022)
+        "DJAZZ TV": REPO_LOGOS.format("stingray-djazz-fr"),
+        "FRANCE 3 NOA": REPO_LOGOS.format("france-3-nouvelle-aquitaine-fr"),
+        "M6 Boutique & Co": REPO_LOGOS.format("m6-boutique-fr"),
+        "Motus TV": REPO_LOGOS.format("motus-fr"),
+        "TAHITI NUI": REPO_LOGOS.format("tntv-fr"),  # Tahiti Nui Télévision (TNTV)
+        "TV5 Monde Info": IMGUR_MIRROR.format("AJx5Fy2.png"),
+        "TV5 Monde Infor": IMGUR_MIRROR.format("AJx5Fy2.png"),
     },
     "DE": {
         "NatGeo": TV_LOGO.format("germany/national-geographic-de"),
@@ -965,7 +974,16 @@ def main():
         label = pretty(min((n for n in names if " " in n), key=len, default=names[0]))
         cid = make_id(label, cc)
         if cid in ids:
-            continue
+            # o tvg-id do fornecedor às vezes é o de outro canal ("FRANCE 3 NOA FHD FR"
+            # vem com "Novelas TV FR"): usa o nome do próprio canal e deixa de fora os
+            # nomes que são de outros canais, para o TiviMate não os confundir
+            names = [n for n in names if make_id(pretty(n), cc) not in ids]
+            if not names:
+                continue
+            label = pretty(names[0])
+            cid = make_id(label, cc)
+            if cid in ids:
+                continue
         ids.add(cid)
         logo_only[(cc, key)] = cid
         ch = ET.SubElement(tv, "channel", id=cid)
