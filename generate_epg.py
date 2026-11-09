@@ -111,6 +111,24 @@ COUNTRIES = {
             ("epgshare01-uk", EPGSHARE.format("UK1"), "names"),
         ],
     },
+    "US": {
+        "groups": r"^United States( VIP)?$", "suffix": "US", "lang": "en",
+        "logos": "united-states", "iptv": "US",
+        "logos_extra": ["united-states/us-local", "international"],
+        "epg": [
+            ("open-epg-us1", OPEN_EPG.format("unitedstates1"), "names"),
+            ("open-epg-us2", OPEN_EPG.format("unitedstates2"), "names"),
+            ("open-epg-us3", OPEN_EPG.format("unitedstates3"), "names"),
+            ("open-epg-us4", OPEN_EPG.format("unitedstates4"), "names"),
+            ("open-epg-us5", OPEN_EPG.format("unitedstates5"), "names"),
+            ("open-epg-us6", OPEN_EPG.format("unitedstates6"), "names"),
+            ("epgshare01-us2", EPGSHARE.format("US2"), "names"),
+            ("epgshare01-us-sports", EPGSHARE.format("US_SPORTS1"), "names"),
+            ("epgshare01-fanduel", EPGSHARE.format("FANDUEL1"), "names"),
+            # estações locais (por indicativo); ~550 MB, lido em fluxo
+            ("epgshare01-us-locals", EPGSHARE.format("US_LOCALS1"), "stream"),
+        ],
+    },
 }
 SKIP_GROUPS = r"24-7|VOD|XXX|Adult"
 SKIP_NAMES = r"24/7"
@@ -124,12 +142,20 @@ SPORT_GROUPS = r"(?i)vip\s*sports?|\bevents?\b"
 SPORT_COUNTRY_WORDS = {
     "PT": r"portugal", "BE": r"belgi(um|que|e)", "BR": r"bra[sz]il",
     "FR": r"france", "DE": r"germany|deutschland", "UK": r"united kingdom|england|scotland",
+    "US": r"united states|\busa\b",
 }
-SPORT_CODES = {"PT": "PT", "BE": "BE", "BR": "BR", "FR": "FR", "DE": "DE", "UK": "UK", "GB": "UK"}
+SPORT_CODES = {"PT": "PT", "BE": "BE", "BR": "BR", "FR": "FR", "DE": "DE", "UK": "UK", "GB": "UK",
+               "US": "US"}
 # Marcas aceites mesmo sem código. "Sky Sports" (plural) é só do Reino Unido;
 # "TNT Sports" também existe no Brasil, mas nestes grupos sem código é o do UK.
 # "S Sports" é a Sky Sports abreviada ("S Sports F1 1 VIP SPORTS").
-SPORT_BRANDS = {"UK": r"^(Sky|S|TNT) Sports\b"}
+# Ligas e serviços só dos EUA ("MLS NEXT Flex", "ESPNplus 3", "NBA League Pass 1",
+# "Peacock | Event 1"...); nomes com código de outro país ("ESPN 1 FHD AU") não entram.
+SPORT_BRANDS = {
+    "UK": r"^(Sky|S|TNT) Sports\b",
+    "US": r"^(NFL|NBA|NHL|MLB|MILB|MLS|AHL|BTN)\b|^ESPN|^Fox (Sports|Soccer)\b"
+          r"|^NBC Sports\b|^Peacock\b|^Paramount\+",
+}
 
 # lista de todos os ficheiros do repositório num só pedido (a API tem limite de 60/h sem token)
 TV_LOGOS_API = "https://api.github.com/repos/tv-logo/tv-logos/git/trees/main?recursive=1"
@@ -160,6 +186,10 @@ REPO_LOGOS = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/{}
 # vez ao atualizar o EPG, por isso os logótipos desapareciam
 IMGUR_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logos", "imgur")
 IMGUR_MIRROR = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/imgur/{}"
+# EUA: cópias dos logótipos encontrados noutros servidores (Wikimedia, Plex, Pluto...),
+# para os logótipos dos EUA virem todos do repositório; nome = servidor + caminho
+US_EXT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logos", "us", "ext")
+US_EXT_MIRROR = "https://raw.githubusercontent.com/Ogait3718/epg-iptv/main/logos/us/ext/{}"
 # logótipos atuais na Wikimedia Commons (confirmados na infobox da Wikipédia)
 COMMONS = "https://upload.wikimedia.org/wikipedia/commons/thumb/{0}/960px-{1}.png"
 CNBC_2025 = COMMONS.format("b/bc/CNBC_2025.svg", "CNBC_2025.svg")
@@ -314,6 +344,48 @@ OFFICIAL_LOGOS = {
         "Sky Sports+ 24": REPO_LOGOS.format("sky-sports-plus-uk"),
         **{f"Sky Sports F1 {n}": REPO_LOGOS.format("sky-sports-f1-uk") for n in range(1, 6)},
     },
+    "US": {
+        # canais de equipa da NBA ("US NBA Atlanta Hawks (A)"): emblema da equipa
+        # (cópias em logos/us/ do tv-logo/tv-logos)
+        **{f"NBA {t.replace('-', ' ').title()}": REPO_LOGOS.format(f"us/nba-{t}") for t in (
+            "atlanta-hawks", "boston-celtics", "brooklyn-nets", "charlotte-hornets",
+            "chicago-bulls", "cleveland-cavaliers", "dallas-mavericks", "denver-nuggets",
+            "detroit-pistons", "golden-state-warriors", "houston-rockets", "indiana-pacers",
+            "los-angeles-lakers", "memphis-grizzlies", "miami-heat", "milwaukee-bucks",
+            "minnesota-timberwolves", "new-orleans-pelicans", "new-york-knicks",
+            "oklahoma-city-thunder", "orlando-magic", "philadelphia-76ers", "phoenix-suns",
+            "portland-trail-blazers", "sacramento-kings", "san-antonio-spurs",
+            "toronto-raptors", "utah-jazz", "washington-wizards")},
+        "NBA Los Angeles Clippers": REPO_LOGOS.format("us/nba-la-clippers"),
+        "beIN Sport 1": REPO_LOGOS.format("us/bein-sports-1"),
+        **{f"DAZN {n}": REPO_LOGOS.format("us/dazn") for n in range(1, 31)},  # "US-DAZN 3"
+        # o iptv-org dava o logótipo de outro canal (This TV, HBO Canada/Hits, SNY...)
+        # ou a versão a preto, invisível no fundo do TiviMate
+        "Cinemax More": REPO_LOGOS.format("us/cinemax"), "CineMax MoreMax": REPO_LOGOS.format("us/cinemax"),
+        "MoreMax": REPO_LOGOS.format("us/cinemax"), "HBO East": REPO_LOGOS.format("us/hbo"),
+        "HBO 2": REPO_LOGOS.format("us/hbo"), "HBO 2 West": REPO_LOGOS.format("us/hbo"),
+        "RetroPlex": REPO_LOGOS.format("us/retroplex"), "IndiePlex": REPO_LOGOS.format("us/indieplex"),
+        "A&E": REPO_LOGOS.format("us/a-and-e"), "A&E TV": REPO_LOGOS.format("us/a-and-e"),
+        "ION TV": REPO_LOGOS.format("us/ion-television"), "CBS": REPO_LOGOS.format("us/cbs"),
+        # sem logótipo certo disponível (o iptv-org dava o de outro canal)
+        "Bleav Football": "", "FilmRise Classic": "", "CTV DRAMA": "", "CTV sci-fi": "",
+        "Fight Sport": "", "Sportsnet East": "",
+        **{f"Fox Sports {r}": REPO_LOGOS.format("us/fanduel-sports-network")
+           for r in ("Ohio", "Ohio Plus", "Time Ohio", "San Antonio", "Arizona")},
+        **{f"beIN Sport {n}": REPO_LOGOS.format(f"us/bein-sports-{n}") for n in range(2, 9)},
+    },
+}
+# EUA: canais de eventos de uma liga/serviço ("NFL-49ers", "MLB 7", "MLS 2023 Leagues
+# Cup Pumas", "Peacock Event 5", "US-DAZN 10"): sem logótipo próprio, ficam com o da
+# marca. Só para canais dos EUA que não encontraram nenhum (cópias em logos/us/).
+# marcas que mudaram de nome: o logótipo atual ganha a todos os outros
+# (Fox Sports regionais -> Bally Sports -> FanDuel Sports Network em 2024)
+US_PREFIX_LOGOS = {"fanduelsports": REPO_LOGOS.format("us/fanduel-sports-network")}
+US_BRAND_LOGOS = {
+    "nfl": REPO_LOGOS.format("us/nfl"), "mlb": REPO_LOGOS.format("us/mlb"),
+    "mls": REPO_LOGOS.format("us/mls"), "paramountmais": REPO_LOGOS.format("us/paramount-plus"),
+    "peacock": REPO_LOGOS.format("us/peacock"), "dazn": REPO_LOGOS.format("us/dazn"),
+    "stadium": REPO_LOGOS.format("us/stadium"), "btn": REPO_LOGOS.format("us/btn"),
 }
 
 # Códigos usados pela fonte MEO -> nome do canal
@@ -483,6 +555,86 @@ NAME_ALIASES = {
         "National Geographic": "Nat Geo HD", "Investigation Discovery": "ID",
         "NICK": "Nickelodeon HD", "MTV 1": "MTV HD", "Racing UK HD": "Racing TV HD",
     },
+    # EUA: nomes antigos ou abreviados na lista -> nome nas fontes; estações locais
+    # pelo indicativo (ver us_callsign). Só entram os confirmados com programação.
+    "US": {
+        "5 StarMax": "5 StarMAX HD East", "CineMax 5 StarMax": "5 StarMAX HD East",
+        "ABC": "ABC National Feed", "ABC 7 ( New York )": "WABC", "ABC News": "ABC News Live",
+        "Adult Swim": "AdultSwim com Cartoon Network", "A&E": "AETV",
+        "American Heroes": "American Heroes Channel HD",
+        "AWE": "A Wealth of Entertainment", "AWE TV": "A Wealth of Entertainment",
+        "beINSports": "beIN Sports USA HD", "bein Sport US": "beIN Sports USA HD",
+        "Bloomberg TV": "Bloomberg HD", "Buzzr": "BUZZR Stream",
+        "Cable News Network": "Cable News Network HDTV",
+        "CBS": "CBS National Schedule", "CBSN": "CBS News National Stream",
+        "CBS Sports Golazo": "CBS Sports Golazo Network",
+        "Cinemax Action East": "Cinemax Action HDTV", "CineMax ActionMax East": "ActionMax Eastern",
+        "Cinemax West": "Cinemax (Pacific)", "Cinemax More": "MoreMax Eastern",
+        "CineMax MoreMax": "MoreMax Eastern", "MoreMax": "MoreMax Eastern",
+        "Comet tv": "Comet", "COWBOY CHANNEL": "The Cowboy Channel", "C-Span 1": "CSPAN",
+        "CW11": "WPIX", "Discovery": "Discovery Channel HD",
+        "Discovery Family": "Discovery Family Channel HD", "Discovery Velocity": "MOTORTREND HD",
+        "E! Entertainment": "E! Entertainment USA East",
+        "EPIX": "MGM+ HD", "EPIX 2": "MGM+ Hits HD", "EPIX DRIVE IN": "MGM+ Drive-In",
+        "EPIX HITS": "MGM+ Marquee", "ESPN 1": "ESPN HD", "Fight": "Fight Network",
+        "FXX East": "FXX USA Eastern", "GAC Family": "GAC Family East",
+        "Galavision": "Galavision HDTV", "Hallmark": "Hallmark Channel HD",
+        "HALLMARK DRAMA": "Hallmark Family", "Hallmark Movies & Mysteries": "Hallmark Mystery HD",
+        "HBO 2 West": "HBO2 (Pacific)", "ION TV": "ION (West Network)", "Law & Crime Network": "Law and Crime",
+        "Lifetime Movies": "Lifetime Movies East", "ME TV": "Me TV Network",
+        "MLB": "MLB Network HD", "MSG": "MSG National",
+        "Nat Geographic": "National Geographic HD", "Nat Geo Wild": "National Geographic Wild HD",
+        "NBA": "NBA TV HD", "NBC Golf": "Golf Channel HD", "NBC Golf Channel": "Golf Channel HD",
+        "NBC New York": "WNBC", "NBC San Diego": "KNSD", "FOX San Diego": "KSWB",
+        "CBS San Diego": "KFMB",
+        # estações Fox próprias (O&O): nome comercial -> indicativo
+        "Fox 10 Phoenix": "KSAZ", "Fox 11 LosAngeles": "KTTV", "Fox 13 Seattle": "KCPQ",
+        "Fox 13 Tampa Bay": "WTVT", "Fox 26 Houston": "KRIV", "Fox 29 Philadelphia": "WTXF",
+        "Fox 2 Detroit": "WJBK", "Fox 2 San Francisco": "KTVU", "Fox 32 Chicago": "WFLD",
+        "Fox 35 Orlando": "WOFL", "Fox 4 Dallas | Fort Worth": "KDFW", "Fox 5 Atlanta": "WAGA",
+        "Fox 5 New York": "WNYW", "Fox 5 Washington DC": "WTTG", "Fox 6 Milwaukee": "WITI",
+        "Fox 7 Austin": "KTBC", "Fox 9 Minneapolis-St. Paul": "KMSP", "FOX 43": "WPMT",
+        "WGN-TV 9  Chicago": "WGN", "WGN America": "NewsNation",
+        "PBS 13 (WNETDT) NewYork": "WNET", "Valley PBS": "KVPT",
+        "TN VA | TRI CITIES | CBS WJHL": "WJHL", "MO | ST. LOUIS ABC KDNL": "KDNL",
+        # Fox Sports regionais -> Bally Sports (2021) -> FanDuel Sports Network (2024)
+        "Fox Sports Cincinnati": "FanDuel Sports Network Ohio - Cincinnati",
+        "Fox Sports Detroit": "FanDuel Sports Network Detroit HD",
+        "Fox Sports Florida": "FanDuel Sports Network Florida",
+        "Fox Sports MIDWEST": "FanDuel Sports Network Midwest St. Louis",
+        "FanDuel Sports Network Midwest": "FanDuel Sports Network Midwest St. Louis",
+        "Fox Sports New Orleans": "FanDuel Sports New Orleans",
+        "Fox Sports North": "FanDuel Sports Network North",
+        "Fox Sports Oklahoma": "FanDuel Sports Network Oklahoma",
+        "Fox Sports Prime Ticket": "FanDuel Sports Network SoCal",
+        "Fox Sports South": "FanDuel Sports Network South",
+        "Fox Sports TENNESSEE": "FanDuel Sports - Tennessee East",
+        "FanDuel Sports Network CAROLINAS": "FanDuel Sports Network South- Carolinas",
+        "Fox Sports Carolina": "FanDuel Sports Network South- Carolinas",
+        # canais de jogo com o nome da rede: grelha da rede
+        "NCAAF | 00 ABC": "ABC National Feed", "NCAAF | 01 ACC NETWORK": "ACC Network",
+        "NCAAF | 02 AT&T SPORTSNET PITTSBURGH": "SportsNet Pittsburgh HD",
+        "NCAAF | 03 BIG TEN NETWORK": "Big Ten Network HD", "NCAAF | 04 CBS": "CBS National Schedule",
+        "NCAAF | 05 CBS SPORTS NETWORK": "CBS Sports Network HD", "NCAAF | 06 ESPN": "ESPN HD",
+        "NCAAF | 07 ESPN 2": "ESPN2", "NCAAF | 08 ESPN U": "ESPNU HD", "NCAAF | 13 FOX": "FOX",
+        "NCAAF | 14 FS1": "Fox Sports 1", "NCAAF | 15 MSG": "MSG National",
+        "NCAAF | 16 SEC NETWORK": "SEC Network HD", "NFL | 00 ESPN MNF": "ESPN HD",
+        "NFL | 00 NFL NETWORK TNF": "NFL Network HD", "NFL | 00 NFL REDZONE": "NFL RedZone HD",
+        "NFL Network 1": "NFL Network HD",
+        "NECN": "NECN New England Cable News", "NESN Plus": "NESN+ New England Sports Network Plus",
+        "News 12 The Bronx": "News 12 Bronx", "One America News": "One America News Network HD",
+        "Outside TV": "Outside Television HD", "Smithsonian Channel": "Smithsonian Channel USA",
+        "SNY": "SNY SportsNet New York HD", "Start TV": "Start TV Network",
+        "Starz Black": "Starz in Black HD", "Starz Cinema East": "Starz Cinema Eastern",
+        "Starz East": "Starz Eastern", "Starz Encore East": "Starz Encore Eastern",
+        "Starz Encore West": "Starz Encore (Pacific)", "Starz Encore Western": "Starz Encore Westerns",
+        "Starz Family": "Starz Encore Family SD", "Starz Kids & Family": "STARZ Kids And Family HD",
+        "Starz West": "Starz (Pacific)", "SUNDANCE": "SundanceTV HD",
+        "VH1 Classic": "MTV Classic", "Viceland": "Vice", "H2": "Vice",
+        "VSiN": "VSIN Vegas Sports and Information Network", "WEATHER NATION": "Weather Nation TV HD",
+        "Spike TV": "Paramount Network", "DIY Network": "Magnolia Network",
+        "Discovery Science": "Science Channel",
+    },
 }
 ALIASES = {"PT": ALIASES_PT}
 
@@ -534,12 +686,44 @@ def strip_source_noise(name):
     return re.sub(COUNTRY_TAIL, "", name, flags=re.I).strip()
 
 
+# Estações locais dos EUA: o indicativo (KTLA, WPWR...) é o que identifica o canal.
+# Na lista: "CA | LOS ANGELES | CW KTLA 5", "ABC 13 Las Vegas NV (KTNV)", "CBS WPEC
+# West Palm Beach"; nas fontes: "KTLA-DT" (US_LOCALS1), "(KMTP) San Francisco, CA".
+US_NETWORKS = r"ABC|CBS|NBC|FOX|CW|PBS|MyTV|MyNetworkTV|ION|Telemundo|Univision|UniMas"
+
+
+CALL = r"(?!WEST\b|KIDS\b|WILD\b|WORLD\b)[KW][A-Z]{2,3}"
+
+
+def us_callsign(name):
+    m = (re.fullmatch(rf"({CALL})-(DT|TV|CD|LD)", name)
+         or re.search(rf"\(({CALL})(?:-(?:TV|DT))?\)", name)
+         or re.match(rf"^(?:{US_NETWORKS})\s+({CALL})\b", name))
+    if m:
+        return m.group(1)
+    if re.match(r"^[A-Z]{2}\s*\|[^|]+\|", name):  # "ESTADO | CIDADE | ..."
+        calls = re.findall(rf"\b({CALL})\b", name.split("|", 2)[2])
+        if calls:
+            return calls[-1]
+    return None
+
+
 def norm(name, cc="PT", aliases=True):
     """Chave de comparação: sem acentos, qualidade, sufixos e pontuação.
 
     Os ALIASES só se aplicam aos nomes da lista/logótipos; os nomes das fontes
     EPG ficam como estão, para "CNN" não ser confundido com "CNN Portugal".
     """
+    if cc == "US":
+        # "US| ABC 15 Phoenix", "00 | UNIMAS (EAST)"
+        name = re.sub(r"^(US|\d{2})\s*\|\s*", "", html.unescape(name).strip())
+        call = us_callsign(name)
+        if call:
+            return call.lower()
+        # "TX | DALLAS | GALAVISION": afiliada sem indicativo -> grelha da rede
+        local = re.match(r"^[A-Z]{2}\s*\|[^|]+\|(.*)$", name)
+        if local and local.group(1).strip(" |"):
+            name = local.group(1)
     # parênteses antes do sufixo de país: "AMAZON PRIME 8 HD FR (ONLY EVENTS)"
     s = re.sub(r"\(.*?\)|\[.*?\]", " ", name)
     s = ascii_fold(strip_source_noise(s)).lower()
@@ -548,6 +732,14 @@ def norm(name, cc="PT", aliases=True):
     toks = [t for t in re.findall(r"[a-z0-9]+", s) if t not in STRIP_TOKENS]
     if cc in SKY_PREFIX and toks[:1] == ["s"]:
         toks[0] = "sky"
+    # EUA: o código vem no fim ("A&E HD US", "Fox 5 ... HD VIP US") ou no início
+    # ("US NFL-49ers"); só aqui, para não mexer nas chaves dos outros países
+    # (o PT usa "CNN US" das fontes)
+    if cc == "US":
+        if len(toks) > 1 and toks[-1] == "us":
+            toks.pop()
+        if len(toks) > 1 and toks[0] == "us":
+            toks.pop(0)
     key = "".join(toks)
     table = ALIASES.get(cc, {})
     return table.get(key, key) if aliases else key
@@ -562,7 +754,10 @@ def pretty(name):
 
 
 def make_id(name, cc):
-    s = re.sub(r"[^A-Za-z0-9+!]+", ".", ascii_fold(pretty(name))).strip(".")
+    name = pretty(name)
+    if cc == "US":  # "A&E HD US" -> "A.E.us", não "A.E.HD.US.us"
+        name = pretty(re.sub(r"^US\s+|(\s+VIP)?\s+US$", "", name))
+    s = re.sub(r"[^A-Za-z0-9+!]+", ".", ascii_fold(name)).strip(".")
     return f"{s}.{cc.lower()}"
 
 
@@ -655,6 +850,39 @@ def scoped_channels(lines):
 # EPG
 # --------------------------------------------------------------------------
 
+def load_epg_stream(src, data, cc, wanted_keys, start, end):
+    """Como load_epg_sources para uma fonte, mas sem ter o XML todo em memória
+    (US_LOCALS1 tem ~550 MB). Devolve {key: (fonte, nome, [programmes])}."""
+    chan_key, progs = {}, {}
+    try:
+        for _, el in ET.iterparse(io.BytesIO(data), events=("end",)):
+            if el.tag == "channel":
+                cid = el.get("id", "")
+                label = el.findtext("display-name") or cid
+                key = norm(label, cc, aliases=False)
+                if key in wanted_keys:
+                    chan_key[cid] = (key, label)
+                el.clear()
+            elif el.tag == "programme":
+                cid = el.get("channel")
+                keep = False
+                if cid in chan_key:
+                    try:
+                        keep = not (parse_time(el.get("stop")) < start or parse_time(el.get("start")) > end)
+                    except (TypeError, ValueError):
+                        keep = False
+                if keep:
+                    progs.setdefault(cid, []).append(copy.deepcopy(el))
+                el.clear()
+    except ET.ParseError as e:
+        log(f"  ! XML inválido: {e}")
+    out = {}
+    for cid, (key, label) in chan_key.items():
+        if progs.get(cid) and key not in out:
+            out[key] = (src, label, progs[cid])
+    return out
+
+
 def load_epg_sources(cc, wanted_keys, start, end):
     """Devolve {key: [(fonte, nome_bonito, [programmes])]} para as chaves pedidas."""
     found = {}
@@ -662,6 +890,13 @@ def load_epg_sources(cc, wanted_keys, start, end):
         log(f"- EPG {cc} {src}: {url}")
         data = fetch(url)
         if not data:
+            continue
+        if kind == "stream":
+            found_src = load_epg_stream(src, data, cc, wanted_keys, start, end)
+            del data
+            for key, item in found_src.items():
+                found.setdefault(key, []).append(item)
+            log(f"  {len(found_src)} canais com programação")
             continue
         try:
             root = ET.parse(io.BytesIO(data)).getroot()
@@ -766,6 +1001,12 @@ def load_tv_logos(cc, folder):
             # com e sem aliases: "BBC One" tem alias para a região de Londres,
             # mas o logótipo "bbcone" também serve de marca para as outras regiões
             keys = {norm(s.replace("-", " "), cc, aliases=a) for s in stems for a in (True, False)}
+            if folder.endswith("/us-local"):
+                m = re.search(r"-([kw][a-z]{2,3})(-hz)?$", stem)
+                if m:
+                    keys.add(m.group(1))
+                # a versão horizontal ("-hz") só se for a única
+                is_hd = is_hd or bool(m and m.group(2))
             for key in keys:
                 # a versão sem "HD" no logótipo é a mais limpa; usa a HD só se for a única
                 if key not in tvlogos or (tvlogos[key][1] and not is_hd):
@@ -839,6 +1080,21 @@ def find_logo(key, table, local):
     prefixes = [k for k in local if len(k) >= 3 and base.startswith(k)
                 and not base[len(k):][:1].isdigit() and not base[len(k):].startswith("news")]
     return local[max(prefixes, key=len)] if prefixes else None
+
+
+def ext_logo_name(url):
+    u = urllib.parse.urlparse(url)
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", f"{u.hostname}{urllib.parse.unquote(u.path)}").strip("_")[-120:]
+
+
+def mirror_logo_us(url):
+    """EUA: troca um logótipo de fora do GitHub pela cópia em logos/us/ext/, se existir."""
+    if urllib.parse.urlparse(url).hostname in ("raw.githubusercontent.com", None):
+        return url
+    fname = ext_logo_name(url)
+    if os.path.isfile(os.path.join(US_EXT_DIR, fname)):
+        return US_EXT_MIRROR.format(urllib.parse.quote(fname))
+    return url
 
 
 def mirror_logo(url):
@@ -934,15 +1190,51 @@ def main():
                 names.append(n)
 
     logos, local_logos = load_logos()
+    provider_logo = {(cc, norm(name, cc)) for i, name, _, cc in channels if get_attr(lines[i], "tvg-logo")}
     logo_of = {}
+    # EUA: as estações locais (chave = indicativo) só procuram no tv-logos dos EUA e nos
+    # nossos; nos nomes do iptv-org "KCTV" (CBS Kansas City) apanhava a King County TV
+    us_only = {k: v for k, v in logos.get("US", {}).items()
+               if "/united-states/" in v or "/Ogait3718/" in v}
     for cc, key in provider_names:
-        url = find_logo(key, logos[cc], local_logos[cc])
+        prefix = next((p for p in US_PREFIX_LOGOS if key.startswith(p)), None) if cc == "US" else None
+        if prefix:
+            url = US_PREFIX_LOGOS[prefix]
+        elif cc == "US" and re.fullmatch(r"[kw][a-z]{2,3}", key):
+            url = find_logo(key, us_only, us_only)
+        else:
+            url = find_logo(key, logos[cc], local_logos[cc])
+        if url is None and cc == "US":
+            # com alias a chave passa a ser a da fonte EPG ("Fox Sports New Orleans" ->
+            # "FanDuel Sports New Orleans"); o logótipo pode estar no nome original
+            for n in provider_names[(cc, key)]:
+                k = norm(n, cc, aliases=False)
+                call = re.fullmatch(r"[kw][a-z]{2,3}", k)
+                url = find_logo(k, us_only if call else logos[cc], us_only if call else local_logos[cc])
+                if url is not None:
+                    break
+            # o da marca só se o fornecedor não der nenhum ("NFL Live 01" já traz o seu)
+            brand = next((b for b in US_BRAND_LOGOS if key.startswith(b)), None)
+            if url is None and brand and (cc, key) not in provider_logo:
+                url = US_BRAND_LOGOS[brand]
         if url:
             logo_of[(cc, key)] = mirror_logo(url)
+            if cc == "US":
+                url = mirror_logo_us(logo_of[(cc, key)])
+                # nos EUA só logótipos do GitHub/repositório; sem cópia fica o do fornecedor
+                if urllib.parse.urlparse(url).hostname == "raw.githubusercontent.com":
+                    logo_of[(cc, key)] = url
+                else:
+                    del logo_of[(cc, key)]
+                    log(f"  ! {cc} {key}: logótipo sem cópia no repositório, ignorado: {url}")
     # logótipos novos do imgur ainda sem cópia: descarregar para logos/imgur/
     no_copy = sorted({u for u in logo_of.values() if "i.imgur.com" in u})
     if no_copy:
         log(f"- {len(no_copy)} logótipos do imgur sem cópia em logos/imgur/: {' '.join(no_copy)}")
+    no_copy_us = sorted({u for (c, _), u in logo_of.items() if c == "US" and "i.imgur.com" not in u
+                         and urllib.parse.urlparse(u).hostname != "raw.githubusercontent.com"})
+    if no_copy_us:
+        log(f"- {len(no_copy_us)} logótipos dos EUA sem cópia em logos/us/ext/: {' '.join(no_copy_us)}")
     tv = ET.Element("tv", {"generator-info-name": "generate_epg.py",
                            "source-info-name": "open-epg.com, epgshare01.online"})
     # o ID vem do nome MEO quando existe, para não mudar de dia para dia
