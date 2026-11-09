@@ -274,6 +274,16 @@ OFFICIAL_LOGOS = {
         # o "rtl-plus-de" do tv-logos não é o logótipo atual (RTL+ 2021)
         "RTL+": REPO_LOGOS.format("rtl-plus-de"),
         "Euronews": EURONEWS_2025,
+        # cópias em logos/ (tv-logo/tv-logos, Wikimedia Commons); a lista não tinha
+        # logótipo ou tinha um antigo (A+E com o do Crime + Investigation, anterior a 2014)
+        "A+E": REPO_LOGOS.format("a-and-e-de"),
+        **{f"Dyn Sport {n}": REPO_LOGOS.format("dyn-de") for n in range(1, 26)},
+        "Franken Plus": REPO_LOGOS.format("franken-plus-de"),
+        "Schau TV": REPO_LOGOS.format("schau-tv-at"),  # texto preto passado a branco
+        "Sky Sport 4K Ultra": REPO_LOGOS.format("sky-sport-uhd-de"),  # é o Sky Sport UHD
+        # canal novo (set. 2026) ainda sem logótipo público: feito no estilo dos
+        # outros Sky Sport DE (como o Sky Sport F1), com o escudo oficial da NFL
+        "Sky Sport NFL": REPO_LOGOS.format("sky-sport-nfl-de"),
     },
     "UK": {
         "E!": TV_LOGO.format("united-kingdom/e-entertainment-uk"),
