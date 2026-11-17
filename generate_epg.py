@@ -795,6 +795,40 @@ def read_m3u(path):
     return raw.split("\n")
 
 
+# Nada disto pode aparecer no canais_publicos.m3u (vai para o repositório público)
+UNSAFE_RE = re.compile(r"https?:|://|username|password|get\.php|player_api|xmltv\.php", re.I)
+
+
+def sanitize_m3u(src, dst):
+    """Cria uma cópia pública da lista: só nomes, tvg-id, tvg-name e grupos dos canais.
+
+    Sem URLs de stream, sem credenciais, sem domínio do fornecedor e sem filmes/séries.
+    O tvg-logo do fornecedor fica só como marca "1" (o script só precisa de saber se existia).
+    """
+    lines = read_m3u(src)
+    if not lines or not lines[0].startswith("#EXTM3U"):
+        sys.exit(f"{src} não é uma lista M3U.")
+    out = ["#EXTM3U"]
+    for i, line in enumerate(lines):
+        if not line.startswith("#EXTINF"):
+            continue
+        url = next((l for l in lines[i + 1:i + 4] if l.strip() and not l.startswith("#")), "")
+        if "/movie/" in url or "/series/" in url:
+            continue
+        name = line.rsplit(",", 1)[-1].strip()
+        attrs = [f'{a}="{get_attr(line, a)}"' for a in ("tvg-id", "tvg-name")]
+        attrs.append(f'tvg-logo="{"1" if get_attr(line, "tvg-logo") else ""}"')
+        attrs.append(f'group-title="{get_attr(line, "group-title")}"')
+        out.append(f"#EXTINF:-1 {' '.join(attrs)},{name}")
+    bad = [n for n, l in enumerate(out, 1) if UNSAFE_RE.search(l)]
+    if bad:
+        sys.exit(f"Sanitização recusada: {len(bad)} linhas com URL/credenciais (ex.: linha {bad[0]}). "
+                 f"Nada foi escrito em {dst}.")
+    with open(dst, "w", encoding="utf-8", newline="") as f:
+        f.write("\n".join(out) + "\n")
+    log(f"{dst}: {len(out) - 1} canais (sem URLs, sem filmes/séries)")
+
+
 def sport_country(name):
     """País de um canal dos grupos de desporto/eventos, ou None se não for claro."""
     # o país por extenso entre parênteses ganha ao código de língua: "(Belgium FR)"
@@ -1169,7 +1203,12 @@ def main():
                          "corresponda a esta regex, ex.: --check 'beIN SPORTS.*FR'")
     ap.add_argument("--epg-url", default=os.environ.get("EPG_URL", ""),
                     help="URL pública do epg.xml, colocada em url-tvg no cabeçalho da lista")
+    ap.add_argument("--sanitize", nargs=2, metavar=("ORIGEM", "DESTINO"),
+                    help="só cria a cópia pública da lista (sem URLs nem credenciais) e sai")
     args = ap.parse_args()
+    if args.sanitize:
+        sanitize_m3u(*args.sanitize)
+        return
     wanted = [c.strip().upper() for c in args.countries.split(",") if c.strip().upper() in COUNTRIES]
 
     now = dt.datetime.now(dt.timezone.utc)

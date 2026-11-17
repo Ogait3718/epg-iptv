@@ -27,23 +27,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Descarregar lista M3U (secret M3U_URL)
-        env:
-          M3U_URL: ${{ secrets.M3U_URL }}
+      # O workflow nunca contacta o fornecedor: usa só a cópia pública sanitizada
+      # (nomes, tvg-id e grupos), atualizada a partir do Mac pelo atualizar_lista.sh
+      - name: Verificar canais_publicos.m3u (sem URLs nem credenciais)
         run: |
-          if [ -z "$M3U_URL" ]; then
-            echo "::error::Falta o secret M3U_URL (Settings > Secrets and variables > Actions)."
-            exit 1
+          test -s canais_publicos.m3u || { echo "::error::Falta o canais_publicos.m3u."; exit 1; }
+          if grep -qiE 'https?:|://|username|password|get\.php|player_api' canais_publicos.m3u; then
+            echo "::error::canais_publicos.m3u tem URLs ou credenciais."; exit 1
           fi
-          # sem -v nem echo do URL, para as credenciais não aparecerem nos logs
-          curl -fsSL --retry 3 --max-time 300 -A "TiviMate/5.0" -o lista.m3u "$M3U_URL" \
-            || { echo "::error::Não foi possível descarregar a lista M3U."; exit 1; }
-          grep -q '^#EXTM3U' lista.m3u || { echo "::error::A resposta não é uma lista M3U."; exit 1; }
 
       - name: Gerar epg.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python generate_epg.py --report ""
+        run: python generate_epg.py --m3u canais_publicos.m3u --report ""
 
       - name: Preparar site (só o epg.xml)
         run: |
@@ -51,7 +47,6 @@ jobs:
           cp epg.xml _site/epg.xml
           gzip -9 -c epg.xml > _site/epg.xml.gz
           touch _site/.nojekyll
-          rm -f lista.m3u
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -2,6 +2,11 @@
 lista.m3u
 *.m3u
 *.m3u8
+# exceção: cópia pública sanitizada (sem URLs nem credenciais)
+!canais_publicos.m3u
+
+# Script local que acede ao fornecedor – só no Mac
+atualizar_lista.sh
 
 # Ficheiros gerados (o epg.xml é publicado pelo workflow no GitHub Pages)
 epg.xml
