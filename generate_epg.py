@@ -792,7 +792,18 @@ def read_m3u(path):
     with open(path, encoding="utf-8", errors="replace", newline="") as f:
         raw = f.read()
     # divide só em "\n" para manter os finais de linha (\r\n ou \n) tal como estão
-    return raw.split("\n")
+    lines = raw.split("\n")
+    # o fornecedor às vezes parte a linha #EXTINF a meio de um atributo (ex.: o URL do
+    # tvg-logo continua na linha seguinte): junta até as aspas ficarem fechadas
+    out, i = [], 0
+    while i < len(lines):
+        line = lines[i]
+        while line.startswith("#EXTINF") and line.count('"') % 2 and i + 1 < len(lines):
+            i += 1
+            line = line.rstrip("\r") + lines[i]
+        out.append(line)
+        i += 1
+    return out
 
 
 # Nada disto pode aparecer no canais_publicos.m3u (vai para o repositório público)
