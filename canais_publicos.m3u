@@ -2592,6 +2592,7 @@
 #EXTINF:-1 tvg-id="Canal Alpha JU HD FR" tvg-name="Canal Alpha JU FR" tvg-logo="1" group-title="France",Canal Alpha JU FR
 #EXTINF:-1 tvg-id="" tvg-name="##########   Turkey   ##########" tvg-logo="" group-title="Turkey",##########   Turkey   ##########
 #EXTINF:-1 tvg-id="" tvg-name="========== TR General ==========" tvg-logo="" group-title="Turkey",========== TR General ==========
+#EXTINF:-1 tvg-id="" tvg-name="Koza TV HD TR" tvg-logo="1" group-title="Turkey",Koza TV HD TR
 #EXTINF:-1 tvg-id="" tvg-name="Show HD TR" tvg-logo="" group-title="Turkey",Show HD TR
 #EXTINF:-1 tvg-id="Show TV HD TR" tvg-name="Show TV FHD TR" tvg-logo="" group-title="Turkey",Show TV FHD TR
 #EXTINF:-1 tvg-id="" tvg-name="Show Turk TR" tvg-logo="" group-title="Turkey",Show Turk TR
@@ -4954,30 +4955,39 @@
 #EXTINF:-1 tvg-id="" tvg-name="========== BE General ==========" tvg-logo="" group-title="Belgium",========== BE General ==========
 #EXTINF:-1 tvg-id="VTM.be" tvg-name="VTM 1 FHD BE" tvg-logo="1" group-title="Belgium",VTM 1 FHD BE
 #EXTINF:-1 tvg-id="VTM.be" tvg-name="VTM 1 HD BE" tvg-logo="1" group-title="Belgium",VTM 1 HD BE
+#EXTINF:-1 tvg-id="VTM 2.be" tvg-name="VTM 2 FHD BE" tvg-logo="1" group-title="Belgium",VTM 2 FHD BE
 #EXTINF:-1 tvg-id="VTM 2.be" tvg-name="VTM 2 HD BE" tvg-logo="1" group-title="Belgium",VTM 2 HD BE
 #EXTINF:-1 tvg-id="VTM 3.be" tvg-name="VTM 3 FHD BE" tvg-logo="1" group-title="Belgium",VTM 3 FHD BE
 #EXTINF:-1 tvg-id="VTM 3.be" tvg-name="VTM 3 HD BE" tvg-logo="1" group-title="Belgium",VTM 3 HD BE
 #EXTINF:-1 tvg-id="VTM 4.be" tvg-name="VTM 4 HD BE" tvg-logo="1" group-title="Belgium",VTM 4 HD BE
+#EXTINF:-1 tvg-id="Play.be" tvg-name="Play FHD BE" tvg-logo="1" group-title="Belgium",Play FHD BE
 #EXTINF:-1 tvg-id="Play.be" tvg-name="Play HD BE" tvg-logo="1" group-title="Belgium",Play HD BE
+#EXTINF:-1 tvg-id="Play Fictie.be" tvg-name="Play Fictie FHD BE" tvg-logo="1" group-title="Belgium",Play Fictie FHD BE
 #EXTINF:-1 tvg-id="Play Fictie.be" tvg-name="Play Fictie HD BE" tvg-logo="1" group-title="Belgium",Play Fictie HD BE
+#EXTINF:-1 tvg-id="Play Actie.be" tvg-name="Play Actie FHD BE" tvg-logo="1" group-title="Belgium",Play Actie FHD BE
 #EXTINF:-1 tvg-id="Play Actie.be" tvg-name="Play Actie HD BE" tvg-logo="1" group-title="Belgium",Play Actie HD BE
 #EXTINF:-1 tvg-id="Ketnet.be" tvg-name="Ketnet FHD BE" tvg-logo="1" group-title="Belgium",Ketnet FHD BE
+#EXTINF:-1 tvg-id="Ketnet.be" tvg-name="Ketnet HD BE" tvg-logo="1" group-title="Belgium",Ketnet HD BE
 #EXTINF:-1 tvg-id="" tvg-name="Njam! HD BE" tvg-logo="1" group-title="Belgium",Njam! HD BE
 #EXTINF:-1 tvg-id="" tvg-name="Star Channel BE" tvg-logo="1" group-title="Belgium",Star Channel BE
 #EXTINF:-1 tvg-id="" tvg-name="BBC NL BE" tvg-logo="1" group-title="Belgium",BBC NL BE
+#EXTINF:-1 tvg-id="" tvg-name="Trends Z FHD BE" tvg-logo="1" group-title="Belgium",Trends Z FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="Trends Z HD BE" tvg-logo="1" group-title="Belgium",Trends Z HD BE
 #EXTINF:-1 tvg-id="" tvg-name="TVL FHD BE" tvg-logo="1" group-title="Belgium",TVL FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="BRUZZ FHD BE" tvg-logo="1" group-title="Belgium",BRUZZ FHD BE
 #EXTINF:-1 tvg-id="La Une.be" tvg-name="RTBF La Une FHD BE" tvg-logo="1" group-title="Belgium",RTBF La Une FHD BE
+#EXTINF:-1 tvg-id="La Une.be" tvg-name="RTBF La Une HD BE" tvg-logo="1" group-title="Belgium",RTBF La Une HD BE
 #EXTINF:-1 tvg-id="Tipik.be" tvg-name="RTBF Tipik FHD BE" tvg-logo="1" group-title="Belgium",RTBF Tipik FHD BE
+#EXTINF:-1 tvg-id="Tipik.be" tvg-name="RTBF Tipik HD BE" tvg-logo="1" group-title="Belgium",RTBF Tipik HD BE
 #EXTINF:-1 tvg-id="Club RTL.be" tvg-name="RTL Club FHD BE" tvg-logo="1" group-title="Belgium",RTL Club FHD BE
+#EXTINF:-1 tvg-id="Club RTL.be" tvg-name="RTL Club HD BE" tvg-logo="1" group-title="Belgium",RTL Club HD BE
 #EXTINF:-1 tvg-id="Plug RTL.be" tvg-name="RTL Plug FHD BE" tvg-logo="1" group-title="Belgium",RTL Plug FHD BE
+#EXTINF:-1 tvg-id="Plug RTL.be" tvg-name="RTL Plug HD BE" tvg-logo="1" group-title="Belgium",RTL Plug HD BE
 #EXTINF:-1 tvg-id="AB 1 FR" tvg-name="AB1 BE" tvg-logo="1" group-title="Belgium",AB1 BE
 #EXTINF:-1 tvg-id="LN24.be" tvg-name="LN24 FHD BE" tvg-logo="1" group-title="Belgium",LN24 FHD BE
 #EXTINF:-1 tvg-id="BE 1.be" tvg-name="Be1 FHD BE" tvg-logo="1" group-title="Belgium",Be1 FHD BE
 #EXTINF:-1 tvg-id="BE 1.be" tvg-name="Be1 +1 FHD BE" tvg-logo="1" group-title="Belgium",Be1 +1 FHD BE
 #EXTINF:-1 tvg-id="ABXPLORE.fr" tvg-name="AB Xplore FHD BE" tvg-logo="1" group-title="Belgium",AB Xplore FHD BE
-#EXTINF:-1 tvg-id="Plug RTL.be" tvg-name="RTL Plug HD BE" tvg-logo="1" group-title="Belgium",RTL Plug HD BE
 #EXTINF:-1 tvg-id="AB3.be" tvg-name="AB3 FHD BE" tvg-logo="1" group-title="Belgium",AB3 FHD BE
 #EXTINF:-1 tvg-id="RTL-TVI.be" tvg-name="RTL TVI FHD BE" tvg-logo="1" group-title="Belgium",RTL TVI FHD BE
 #EXTINF:-1 tvg-id="Qu4tre Liege Media.be" tvg-name="QU4TRE FHD BE" tvg-logo="1" group-title="Belgium",QU4TRE FHD BE
@@ -4985,6 +4995,7 @@
 #EXTINF:-1 tvg-id="" tvg-name="TV Lux FHD BE" tvg-logo="1" group-title="Belgium",TV Lux FHD BE
 #EXTINF:-1 tvg-id="Bouke.be" tvg-name="Boukè FHD BE" tvg-logo="1" group-title="Belgium",Boukè FHD BE
 #EXTINF:-1 tvg-id="BX1.be" tvg-name="BX1 FHD BE" tvg-logo="1" group-title="Belgium",BX1 FHD BE
+#EXTINF:-1 tvg-id="BX1.be" tvg-name="BX1 HD BE" tvg-logo="1" group-title="Belgium",BX1 HD BE
 #EXTINF:-1 tvg-id="Piwiplus FR" tvg-name="Piwi+ FHD BE" tvg-logo="1" group-title="Belgium",Piwi+ FHD BE
 #EXTINF:-1 tvg-id="La Trois.be" tvg-name="RTBF La Trois FHD BE" tvg-logo="1" group-title="Belgium",RTBF La Trois FHD BE
 #EXTINF:-1 tvg-id="TF1 FR" tvg-name="TF1 FHD BE" tvg-logo="1" group-title="Belgium",TF1 FHD BE
@@ -5002,39 +5013,29 @@
 #EXTINF:-1 tvg-id="CSTAR FR" tvg-name="C Star FHD BE" tvg-logo="1" group-title="Belgium",C Star FHD BE
 #EXTINF:-1 tvg-id="TvBreizh FR" tvg-name="TV Breizh FHD BE" tvg-logo="1" group-title="Belgium",TV Breizh FHD BE
 #EXTINF:-1 tvg-id="LCI - La Chaine Info FR" tvg-name="LCI FHD BE" tvg-logo="1" group-title="Belgium",LCI FHD BE
-#EXTINF:-1 tvg-id="" tvg-name="Trends Z FHD BE" tvg-logo="1" group-title="Belgium",Trends Z FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="Bel RTL BE" tvg-logo="1" group-title="Belgium",Bel RTL BE
 #EXTINF:-1 tvg-id="" tvg-name="RTL District BE" tvg-logo="1" group-title="Belgium",RTL District BE
 #EXTINF:-1 tvg-id="" tvg-name="Divertissez Voo FHD BE" tvg-logo="1" group-title="Belgium",Divertissez Voo FHD BE
 #EXTINF:-1 tvg-id="AB3.be" tvg-name="AB3 Family FHD BE" tvg-logo="1" group-title="Belgium",AB3 Family FHD BE
 #EXTINF:-1 tvg-id="NoTele.be" tvg-name="Notele FHD BE" tvg-logo="1" group-title="Belgium",Notele FHD BE
 #EXTINF:-1 tvg-id="VTM 4.be" tvg-name="VTM 4 BE" tvg-logo="1" group-title="Belgium",VTM 4 BE
-#EXTINF:-1 tvg-id="Play Actie.be" tvg-name="Play Actie FHD BE" tvg-logo="1" group-title="Belgium",Play Actie FHD BE
-#EXTINF:-1 tvg-id="Play Fictie.be" tvg-name="Play Fictie FHD BE" tvg-logo="1" group-title="Belgium",Play Fictie FHD BE
-#EXTINF:-1 tvg-id="VTM 2.be" tvg-name="VTM 2 FHD BE" tvg-logo="1" group-title="Belgium",VTM 2 FHD BE
-#EXTINF:-1 tvg-id="Ketnet.be" tvg-name="Ketnet HD BE" tvg-logo="1" group-title="Belgium",Ketnet HD BE
-#EXTINF:-1 tvg-id="Tipik.be" tvg-name="RTBF Tipik HD BE" tvg-logo="1" group-title="Belgium",RTBF Tipik HD BE
 #EXTINF:-1 tvg-id="Play Crime.be" tvg-name="Play Crime FHD BE" tvg-logo="1" group-title="Belgium",Play Crime FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="Bel RTL FHD BE" tvg-logo="1" group-title="Belgium",Bel RTL FHD BE
-#EXTINF:-1 tvg-id="La Une.be" tvg-name="RTBF La Une HD BE" tvg-logo="1" group-title="Belgium",RTBF La Une HD BE
 #EXTINF:-1 tvg-id="La Trois.be" tvg-name="RTBF La Trois BE" tvg-logo="1" group-title="Belgium",RTBF La Trois BE
-#EXTINF:-1 tvg-id="Club RTL.be" tvg-name="RTL Club HD BE" tvg-logo="1" group-title="Belgium",RTL Club HD BE
-#EXTINF:-1 tvg-id="BX1.be" tvg-name="BX1 HD BE" tvg-logo="1" group-title="Belgium",BX1 HD BE
 #EXTINF:-1 tvg-id="192TV BE" tvg-name="192 TV BE" tvg-logo="1" group-title="Belgium",192 TV BE
 #EXTINF:-1 tvg-id="" tvg-name="Matélé FHD BE" tvg-logo="1" group-title="Belgium",Matélé FHD BE
-#EXTINF:-1 tvg-id="Play.be" tvg-name="Play FHD BE" tvg-logo="1" group-title="Belgium",Play FHD BE
 #EXTINF:-1 tvg-id="Play Reality.be" tvg-name="Play Reality FHD BE" tvg-logo="1" group-title="Belgium",Play Reality FHD BE
+#EXTINF:-1 tvg-id="Play Reality.be" tvg-name="Play Reality HD BE" tvg-logo="1" group-title="Belgium",Play Reality HD BE
 #EXTINF:-1 tvg-id="" tvg-name="Eldo Radio TV Luxembourg BE" tvg-logo="1" group-title="Belgium",Eldo Radio TV Luxembourg BE
 #EXTINF:-1 tvg-id="" tvg-name="VTM Gold HD BE" tvg-logo="1" group-title="Belgium",VTM Gold HD BE
-#EXTINF:-1 tvg-id="Play Reality.be" tvg-name="Play Reality HD BE" tvg-logo="1" group-title="Belgium",Play Reality HD BE
 #EXTINF:-1 tvg-id="Q2 BE" tvg-name="ATV Antwerpen HD BE" tvg-logo="1" group-title="Belgium",ATV Antwerpen HD BE
 #EXTINF:-1 tvg-id="" tvg-name="========== BE News ==========" tvg-logo="" group-title="Belgium",========== BE News ==========
+#EXTINF:-1 tvg-id="n.fr" tvg-name="VRT 1 FHD BE" tvg-logo="1" group-title="Belgium",VRT 1 FHD BE
 #EXTINF:-1 tvg-id="n.fr" tvg-name="VRT 1 HD BE" tvg-logo="1" group-title="Belgium",VRT 1 HD BE
 #EXTINF:-1 tvg-id="Canvas.be" tvg-name="VRT Canvas FHD BE" tvg-logo="1" group-title="Belgium",VRT Canvas FHD BE
 #EXTINF:-1 tvg-id="TV5MONDE FR" tvg-name="TV5 Monde FHD BE" tvg-logo="1" group-title="Belgium",TV5 Monde FHD BE
 #EXTINF:-1 tvg-id="Euronews FR" tvg-name="Euronews FHD BE" tvg-logo="1" group-title="Belgium",Euronews FHD BE
 #EXTINF:-1 tvg-id="France 24 FR" tvg-name="France 24 FHD BE" tvg-logo="1" group-title="Belgium",France 24 FHD BE
-#EXTINF:-1 tvg-id="n.fr" tvg-name="VRT 1 FHD BE" tvg-logo="1" group-title="Belgium",VRT 1 FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="========== BE Entertainment ==========" tvg-logo="" group-title="Belgium",========== BE Entertainment ==========
 #EXTINF:-1 tvg-id="" tvg-name="E! Entertainment HD BE" tvg-logo="1" group-title="Belgium",E! Entertainment HD BE
 #EXTINF:-1 tvg-id="" tvg-name="TLC HD BE" tvg-logo="1" group-title="Belgium",TLC HD BE
@@ -5116,13 +5117,13 @@
 #EXTINF:-1 tvg-id="Histoire TV FR" tvg-name="History HD BE" tvg-logo="1" group-title="Belgium",History HD BE
 #EXTINF:-1 tvg-id="" tvg-name="Love Nature BE" tvg-logo="1" group-title="Belgium",Love Nature BE
 #EXTINF:-1 tvg-id="National Geographic FR" tvg-name="National Geographic FHD BE" tvg-logo="1" group-title="Belgium",National Geographic FHD BE
+#EXTINF:-1 tvg-id="National Geographic BE" tvg-name="National Geographic HD BE" tvg-logo="1" group-title="Belgium",National Geographic HD BE
 #EXTINF:-1 tvg-id="Arte Belgique.be" tvg-name="Arte FHD BE" tvg-logo="1" group-title="Belgium",Arte FHD BE
 #EXTINF:-1 tvg-id="Ushuaia TV FR" tvg-name="Ushuaïa TV FHD BE" tvg-logo="1" group-title="Belgium",Ushuaïa TV FHD BE
-#EXTINF:-1 tvg-id="National Geographic BE" tvg-name="National Geographic HD BE" tvg-logo="1" group-title="Belgium",National Geographic HD BE
 #EXTINF:-1 tvg-id="" tvg-name="========== BE Music ==========" tvg-logo="" group-title="Belgium",========== BE Music ==========
+#EXTINF:-1 tvg-id="MTV FR" tvg-name="MTV FHD BE" tvg-logo="1" group-title="Belgium",MTV FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="MTV HD BE" tvg-logo="1" group-title="Belgium",MTV HD BE
 #EXTINF:-1 tvg-id="Trace Urban FR" tvg-name="Trace Urban BE" tvg-logo="1" group-title="Belgium",Trace Urban BE
-#EXTINF:-1 tvg-id="MTV FR" tvg-name="MTV FHD BE" tvg-logo="1" group-title="Belgium",MTV FHD BE
 #EXTINF:-1 tvg-id="" tvg-name="Clubbing TV BE" tvg-logo="1" group-title="Belgium",Clubbing TV BE
 #EXTINF:-1 tvg-id="" tvg-name="Eclips TV BE" tvg-logo="1" group-title="Belgium",Eclips TV BE
 #EXTINF:-1 tvg-id="" tvg-name="##########   Czech Republic   ##########" tvg-logo="" group-title="Czech Republic",##########   Czech Republic   ##########
